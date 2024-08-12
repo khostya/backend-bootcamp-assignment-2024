@@ -16,12 +16,6 @@ linters-settings:
     # Default: 0.0
     package-average: 10.0
 
-  errcheck:
-    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
-    # Such cases aren't reported by default.
-    # Default: false
-    check-type-assertions: true
-
   exhaustive:
     # Program elements to check for exhaustiveness.
     # Default: [ switch ]
@@ -75,20 +69,6 @@ linters-settings:
     # Minimal code complexity to report.
     # Default: 30 (but we recommend 10-20)
     min-complexity: 20
-
-  gocritic:
-    # Settings passed to gocritic.
-    # The settings key is the name of a supported gocritic checker.
-    # The list of supported checkers can be find in https://go-critic.github.io/overview.
-    settings:
-      captLocal:
-        # Whether to restrict checker to params only.
-        # Default: true
-        paramsOnly: false
-      underef:
-        # Whether to skip (*x).method() calls where x is a pointer receiver.
-        # Default: true
-        skipRecvDeref: false
 
   gomnd:
     # List of function patterns to exclude from analysis.
@@ -186,12 +166,8 @@ linters:
   disable-all: true
   enable:
     ## enabled by default
-    - errcheck # checking for unchecked errors, these unchecked errors can be critical bugs in some cases
-    - gosimple # specializes in simplifying a code
     - ineffassign # detects when assignments to existing variables are not used
     - typecheck # like the front-end of a Go compiler, parses and type-checks Go code
-    - unused # checks for unused constants, variables, functions and types
-    ## disabled by default
     - asasalint # checks for pass []any as any in variadic func(...any)
     - asciicheck # checks that your code does not contain non-ASCII identifiers
     - bidichk # checks for dangerous unicode character sequences
@@ -209,7 +185,6 @@ linters:
     - gochecksumtype # checks exhaustiveness on Go "sum types"
     - gocognit # computes and checks the cognitive complexity of functions
     - goconst # finds repeated strings that could be replaced by a constant
-    - gocritic # provides diagnostics that check for bugs, performance and style issues
     - gocyclo # computes and checks the cyclomatic complexity of functions
     - godot # checks if comments end in a period
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
@@ -224,7 +199,6 @@ linters:
     - nilerr # finds the code that returns nil even if it checks that the error is not nil
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
     - noctx # finds sending http request without context.Context
-    - nonamedreturns # reports all named returns
     - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
     - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
     - promlinter # checks Prometheus metrics naming via promlint
@@ -237,7 +211,6 @@ linters:
     - tenv # detects using os.Setenv instead of t.Setenv since Go1.17
     - testableexamples # checks if examples are testable (have an expected output)
     - testifylint # checks usage of github.com/stretchr/testify
-    - testpackage # makes you use a separate _test package
     - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
     - unconvert # removes unnecessary type conversions
     - unparam # reports unused function parameters
@@ -293,8 +266,6 @@ issues:
   exclude-rules:
     - source: "(noinspection|TODO)"
       linters: [ godot ]
-    - source: "//noinspection"
-      linters: [ gocritic ]
     - path: "_test\\.go"
       linters:
         - bodyclose

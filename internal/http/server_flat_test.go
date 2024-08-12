@@ -77,6 +77,8 @@ func TestServerFlat_postCreate(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			mocks := newMocks(t)
 			tt.mockFn(mocks)
 
@@ -140,6 +142,8 @@ func TestServerFlat_postUpdate(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			mocks := newMocks(t)
 			tt.mockFn(mocks)
 
