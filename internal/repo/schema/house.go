@@ -24,7 +24,7 @@ func (h House) Values() []any {
 }
 
 func (h House) Columns() []string {
-	return []string{"id", "address", "year", "developer", "created_at", "updated_at", "last_flat_added_at"}
+	return []string{"id", "address", "year", "developer", "created_at", "last_flat_added_at"}
 }
 
 func (h House) ValuesInsert() []any {

@@ -29,6 +29,10 @@ func (s *UsersTestSuite) SetupSuite() {
 	s.ctx = context.Background()
 }
 
+func (s *UsersTestSuite) SetupTest() {
+	s.T().Parallel()
+}
+
 func (s *UsersTestSuite) TestCreate() {
 	user := NewUser()
 

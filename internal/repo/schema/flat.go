@@ -25,6 +25,14 @@ func (f Flat) Columns() []string {
 	return []string{"id", "house_id", "price", "rooms", "status", "moderator_id"}
 }
 
+func (f Flat) InsertValues() []any {
+	return []any{f.HouseID, f.Price, f.Rooms, f.Status, f.ModeratorID}
+}
+
+func (f Flat) InsertColumns() []string {
+	return []string{"house_id", "price", "rooms", "status", "moderator_id"}
+}
+
 func NewFlat(flat domain.Flat) Flat {
 	return Flat{
 		ID:          flat.ID,

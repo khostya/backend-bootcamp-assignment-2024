@@ -41,7 +41,7 @@ func (h House) Create(ctx context.Context, house domain.House) (uint, error) {
 func (h House) GetByID(ctx context.Context, id uint) (domain.House, error) {
 	db := h.queryEngineProvider.GetQueryEngine(ctx)
 
-	query := sq.Select(schema.Flat{}.Columns()...).
+	query := sq.Select(schema.House{}.Columns()...).
 		From(houseTable).
 		Where("id = $1", id).
 		PlaceholderFormat(sq.Dollar)
@@ -59,7 +59,7 @@ func (h House) UpdateLastFlatAddedAt(ctx context.Context, id uint, lastFlatAdded
 
 	query := sq.Update(houseTable).
 		Set("last_flat_added_at", lastFlatAddedAt).
-		Where("id = $1", id).
+		Where("id = $2", id).
 		PlaceholderFormat(sq.Dollar)
 
 	return exec.Update(ctx, query, db)

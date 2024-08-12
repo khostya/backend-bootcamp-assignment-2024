@@ -4,6 +4,7 @@ package postgres
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
@@ -32,6 +33,10 @@ func (s *FlatsTestSuite) SetupSuite() {
 	s.ctx = context.Background()
 }
 
+func (s *FlatsTestSuite) SetupTest() {
+	s.T().Parallel()
+}
+
 func (s *FlatsTestSuite) TestCreate() {
 	_ = s.createFlat()
 }
@@ -56,8 +61,20 @@ func (s *FlatsTestSuite) TestUpdateStatus() {
 	require.EqualExportedValues(s.T(), flat, actual)
 }
 
+func (s *FlatsTestSuite) TestSetModeratorID() {
+	flat := s.createFlat()
+	flat.ModeratorID = uuid.New()
+
+	err := s.flatRepo.SetModeratorID(s.ctx, flat.ID, &flat.ModeratorID)
+	require.NoError(s.T(), err)
+
+	actual, err := s.flatRepo.GetByID(s.ctx, flat.ID)
+	require.NoError(s.T(), err)
+	require.EqualValues(s.T(), flat.ModeratorID, actual.ModeratorID)
+}
+
 func (s *FlatsTestSuite) createFlat() domain.Flat {
-	houses := NewHouses()
+	houses := NewHouse()
 
 	houseID, err := s.houseRepo.Create(s.ctx, houses)
 	require.NoError(s.T(), err)

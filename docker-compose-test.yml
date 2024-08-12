@@ -20,17 +20,6 @@ services:
       retries: 5
     restart: unless-stopped
 
-  integration-postgres:
-    build:
-      context: .
-      dockerfile: tests/postgres/Dockerfile
-    environment:
-      TEST_DATABASE_URL: postgres://postgres:password@localhost:5430/postgres?sslmode=disable
-    container_name: integration-postgres
-    image: integration-postgres
-    depends_on:
-      - postgres-test
-
 volumes:
   postgres-test:
     name: postgres-test

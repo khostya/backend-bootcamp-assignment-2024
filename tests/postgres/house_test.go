@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"testing"
+	"time"
 )
 
 type HousesTestSuite struct {
@@ -29,15 +30,19 @@ func (s *HousesTestSuite) SetupSuite() {
 	s.ctx = context.Background()
 }
 
+func (s *HousesTestSuite) SetupTest() {
+	s.T().Parallel()
+}
+
 func (s *HousesTestSuite) TestCreate() {
-	houses := NewHouses()
+	houses := NewHouse()
 
 	_, err := s.houseRepo.Create(s.ctx, houses)
 	require.NoError(s.T(), err)
 }
 
 func (s *HousesTestSuite) TestGetByID() {
-	houses := NewHouses()
+	houses := NewHouse()
 
 	id, err := s.houseRepo.Create(s.ctx, houses)
 	require.NoError(s.T(), err)
@@ -46,4 +51,20 @@ func (s *HousesTestSuite) TestGetByID() {
 	actual, err := s.houseRepo.GetByID(s.ctx, id)
 	require.NoError(s.T(), err)
 	require.EqualExportedValues(s.T(), houses, actual)
+}
+
+func (s *HousesTestSuite) TestUpdateLastFlatAddedAt() {
+	house := NewHouse()
+
+	id, err := s.houseRepo.Create(s.ctx, house)
+	require.NoError(s.T(), err)
+	house.ID = id
+
+	at := time.Now()
+	err = s.houseRepo.UpdateLastFlatAddedAt(s.ctx, id, at)
+	require.NoError(s.T(), err)
+
+	actual, err := s.houseRepo.GetByID(s.ctx, id)
+	require.NoError(s.T(), err)
+	require.EqualExportedValues(s.T(), at, actual.LastFlatAddedAt)
 }

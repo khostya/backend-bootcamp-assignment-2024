@@ -15,7 +15,7 @@ var (
 
 const (
 	usersTable  = "bootcamp.users"
-	flatsTable  = "bootcamp.users"
+	flatsTable  = "bootcamp.flats"
 	housesTable = "bootcamp.houses"
 )
 

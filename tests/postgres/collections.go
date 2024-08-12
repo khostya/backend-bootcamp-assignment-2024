@@ -6,6 +6,7 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"strconv"
 	"time"
 )
 
@@ -18,10 +19,10 @@ func NewUser() domain.User {
 	}
 }
 
-func NewHouses() domain.House {
+func NewHouse() domain.House {
 	return domain.House{
 		ID:              0,
-		Address:         "3131",
+		Address:         strconv.Itoa(gofakeit.Int()),
 		Year:            3131,
 		Developer:       "3131",
 		CreatedAt:       time.Now(),

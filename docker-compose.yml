@@ -3,6 +3,8 @@ version: "3.9"
 services:
   server:
     container_name: server
+    environment:
+      PG_URL: postgres://user:password@postgres:5431/postgres?sslmode=disable
     build:
       context: .
       dockerfile: Dockerfile
