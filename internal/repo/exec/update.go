@@ -1,10 +1,10 @@
 package exec
 
 import (
-	"backend-bootcamp-assignment-2024/internal/repo/repoerr"
-	"backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"context"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/repoerr"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 )
 
 func Update(ctx context.Context, query sq.UpdateBuilder, db transactor.QueryEngine) error {

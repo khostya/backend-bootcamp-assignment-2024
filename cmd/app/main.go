@@ -1,9 +1,9 @@
 package main
 
 import (
-	"backend-bootcamp-assignment-2024/internal/app"
-	"backend-bootcamp-assignment-2024/internal/config"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/app"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/config"
 	"log"
 	"os/signal"
 	"syscall"

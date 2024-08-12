@@ -1,12 +1,12 @@
 package repo
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/repo/exec"
-	"backend-bootcamp-assignment-2024/internal/repo/schema"
-	"backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"context"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/exec"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/schema"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"time"
 )
 

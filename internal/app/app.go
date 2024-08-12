@@ -1,12 +1,12 @@
 package app
 
 import (
-	"backend-bootcamp-assignment-2024/internal/cache"
-	"backend-bootcamp-assignment-2024/internal/config"
-	"backend-bootcamp-assignment-2024/internal/http"
-	"backend-bootcamp-assignment-2024/internal/usecase"
-	"backend-bootcamp-assignment-2024/pkg/postgres"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/cache"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/config"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/usecase"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/postgres"
 )
 
 const (

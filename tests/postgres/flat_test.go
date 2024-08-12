@@ -3,10 +3,10 @@
 package postgres
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/repo"
-	"backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"testing"

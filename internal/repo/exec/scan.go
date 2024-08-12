@@ -1,10 +1,10 @@
 package exec
 
 import (
-	"backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"context"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 )
 
 func ScanOne[T any](ctx context.Context, query sq.SelectBuilder, db transactor.QueryEngine) (T, error) {

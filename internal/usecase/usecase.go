@@ -1,11 +1,11 @@
 package usecase
 
 import (
-	"backend-bootcamp-assignment-2024/internal/repo"
-	"backend-bootcamp-assignment-2024/internal/repo/transactor"
-	"backend-bootcamp-assignment-2024/pkg/auth"
-	"backend-bootcamp-assignment-2024/pkg/hash"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/auth"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/hash"
 	"time"
 )
 

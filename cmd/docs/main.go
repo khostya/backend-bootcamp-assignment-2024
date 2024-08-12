@@ -1,8 +1,8 @@
 package main
 
 import (
-	"backend-bootcamp-assignment-2024/internal/config"
 	"fmt"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/config"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"log"
 	"net/http"

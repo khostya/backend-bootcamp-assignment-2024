@@ -1,3 +1,5 @@
+[![build status](https://github.com/khostya/backend-bootcamp-assignment-2024/workflows/build.yml/badge.svg?event=pushg "build status")](https://github.com/khostya/backend-bootcamp-assignment-2024/actions/workflows/build.yml)
+
 # Тестовое задание для отбора на Avito Backend Bootcamp
 ## Сервис домов
 

@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	"backend-bootcamp-assignment-2024/internal/dto"
-	mock_repo "backend-bootcamp-assignment-2024/internal/repo/mocks"
-	mock_transactor "backend-bootcamp-assignment-2024/internal/repo/transactor/mocks"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
+	mock_repo "github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/mocks"
+	mock_transactor "github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor/mocks"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"testing"

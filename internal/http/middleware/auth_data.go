@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/pkg/auth"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/auth"
 	"net/http"
 	"strings"
 )

@@ -10,7 +10,7 @@
 package mock_transactor
 
 import (
-	transactor "backend-bootcamp-assignment-2024/internal/repo/transactor"
+	transactor "github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 	context "context"
 	reflect "reflect"
 

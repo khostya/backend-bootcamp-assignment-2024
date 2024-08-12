@@ -1,9 +1,9 @@
 package postgresql
 
 import (
-	"backend-bootcamp-assignment-2024/pkg/postgres"
 	"context"
 	"fmt"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/postgres"
 	"os"
 	"strings"
 )

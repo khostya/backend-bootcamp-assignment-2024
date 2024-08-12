@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"

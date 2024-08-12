@@ -3,9 +3,9 @@
 package postgres
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 	"time"
 )
 
@@ -20,12 +20,12 @@ func NewUser() domain.User {
 
 func NewHouses() domain.House {
 	return domain.House{
-		ID:        0,
-		Address:   "3131",
-		Year:      3131,
-		Developer: "3131",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		ID:              0,
+		Address:         "3131",
+		Year:            3131,
+		Developer:       "3131",
+		CreatedAt:       time.Now(),
+		LastFlatAddedAt: time.Now(),
 	}
 }
 

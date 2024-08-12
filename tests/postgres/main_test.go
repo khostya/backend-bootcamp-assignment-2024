@@ -3,8 +3,8 @@
 package postgres
 
 import (
-	"backend-bootcamp-assignment-2024/tests/postgres/postgresql"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/tests/postgres/postgresql"
 	"os"
 	"testing"
 )

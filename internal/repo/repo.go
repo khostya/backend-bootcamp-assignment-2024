@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"backend-bootcamp-assignment-2024/internal/repo/transactor"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 )
 
 type Repositories struct {

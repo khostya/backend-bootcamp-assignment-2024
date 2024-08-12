@@ -1,9 +1,9 @@
 package postgresql
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/repo/schema"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/schema"
 )
 
 func (d *DBPool) CreateUser(ctx context.Context, user domain.User) error {

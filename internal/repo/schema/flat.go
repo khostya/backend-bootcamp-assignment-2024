@@ -1,9 +1,9 @@
 package schema
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
 	"database/sql"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 )
 
 type (

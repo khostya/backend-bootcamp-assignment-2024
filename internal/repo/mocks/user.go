@@ -3,7 +3,7 @@
 package mock_repo
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 	"context"
 
 	"github.com/google/uuid"

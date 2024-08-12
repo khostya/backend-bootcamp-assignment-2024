@@ -1,13 +1,13 @@
 package http
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/dto"
-	"backend-bootcamp-assignment-2024/internal/http/api"
-	"backend-bootcamp-assignment-2024/internal/http/middleware"
 	"context"
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/api"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/middleware"
 	"net/http"
 )
 

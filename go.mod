@@ -1,4 +1,4 @@
-module backend-bootcamp-assignment-2024
+module github.com/khostya/backend-bootcamp-assignment-2024
 
 go 1.22.5
 

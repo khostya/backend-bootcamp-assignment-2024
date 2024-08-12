@@ -1,12 +1,12 @@
 package http
 
 import (
-	"backend-bootcamp-assignment-2024/internal/cache"
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/http/api"
-	"backend-bootcamp-assignment-2024/internal/http/middleware"
 	"context"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/cache"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/api"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/middleware"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"net/http"
