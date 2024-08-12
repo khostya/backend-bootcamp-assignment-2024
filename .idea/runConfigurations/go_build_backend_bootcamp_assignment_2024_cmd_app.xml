@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="go build backend-bootcamp-assignment-2024/cmd/app" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+    <module name="backend-bootcamp-assignment-2024" />
+    <working_directory value="$PROJECT_DIR$" />
+    <envs>
+      <env name="DATABASE_URL" value="postgres://postgres:password@localhost:5431/postgres?sslmode=disable" />
+    </envs>
+    <kind value="PACKAGE" />
+    <package value="backend-bootcamp-assignment-2024/cmd/app" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/cmd/app/main.go" />
+    <method v="2" />
+  </configuration>
+</component>
