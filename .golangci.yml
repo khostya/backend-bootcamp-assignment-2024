@@ -144,11 +144,6 @@ linters-settings:
     # Default: false
     require-specific: true
 
-  perfsprint:
-    # Optimizes into strings concatenation.
-    # Default: true
-    strconcat: false
-
   rowserrcheck:
     # database/sql is always checked
     # Default: []
@@ -200,7 +195,6 @@ linters:
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
     - noctx # finds sending http request without context.Context
     - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
-    - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
     - promlinter # checks Prometheus metrics naming via promlint
     - protogetter # reports direct reads from proto message fields when getters should be used
     - reassign # checks that package variables are not reassigned
