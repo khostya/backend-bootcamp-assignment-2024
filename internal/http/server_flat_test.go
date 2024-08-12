@@ -4,7 +4,9 @@ import (
 	"backend-bootcamp-assignment-2024/internal/cache"
 	"backend-bootcamp-assignment-2024/internal/domain"
 	"backend-bootcamp-assignment-2024/internal/http/api"
+	"backend-bootcamp-assignment-2024/internal/http/middleware"
 	"context"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"net/http"
@@ -78,7 +80,7 @@ func TestServerFlat_postCreate(t *testing.T) {
 			mocks := newMocks(t)
 			tt.mockFn(mocks)
 
-			server, err := newServer(mocks.useCases, Cache{house: cache.NewHouseCache(0, 0)})
+			server, err := newServer(mocks.useCases, Cache{House: cache.NewHouseCache(0, 0)})
 			require.NoError(t, err)
 
 			status, _, err := server.postFlatCreate(ctx, tt.input)
@@ -94,7 +96,7 @@ func TestServerFlat_postUpdate(t *testing.T) {
 	type test struct {
 		name    string
 		input   api.PostFlatUpdateJSONBody
-		mockFn  func(ctx context.Context, m mocks)
+		mockFn  func(m mocks)
 		status  int
 		wandErr bool
 	}
@@ -108,8 +110,8 @@ func TestServerFlat_postUpdate(t *testing.T) {
 			},
 			wandErr: false,
 			status:  http.StatusOK,
-			mockFn: func(ctx context.Context, m mocks) {
-				m.Flat.EXPECT().Update(ctx, gomock.Any()).Times(1).Return(domain.Flat{}, nil)
+			mockFn: func(m mocks) {
+				m.Flat.EXPECT().Update(gomock.Any(), gomock.Any()).Times(1).Return(domain.Flat{}, nil)
 			},
 		},
 		{
@@ -119,7 +121,7 @@ func TestServerFlat_postUpdate(t *testing.T) {
 			},
 			wandErr: true,
 			status:  http.StatusBadRequest,
-			mockFn: func(ctx context.Context, m mocks) {
+			mockFn: func(m mocks) {
 			},
 		},
 		{
@@ -129,7 +131,7 @@ func TestServerFlat_postUpdate(t *testing.T) {
 			},
 			wandErr: true,
 			status:  http.StatusBadRequest,
-			mockFn: func(ctx context.Context, m mocks) {
+			mockFn: func(m mocks) {
 			},
 		},
 	}
@@ -139,10 +141,13 @@ func TestServerFlat_postUpdate(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			mocks := newMocks(t)
-			tt.mockFn(ctx, mocks)
+			tt.mockFn(mocks)
 
-			server, err := newServer(mocks.useCases, Cache{house: cache.NewHouseCache(0, 0)})
+			server, err := newServer(mocks.useCases, Cache{House: cache.NewHouseCache(0, 0)})
 			require.NoError(t, err)
+
+			ctx := context.WithValue(ctx, middleware.UserID, uuid.New())
+			ctx = context.WithValue(ctx, middleware.UserType, domain.UserModerator)
 
 			status, _, err := server.postFlatUpdate(ctx, tt.input)
 			require.Equal(t, tt.wandErr, err != nil)

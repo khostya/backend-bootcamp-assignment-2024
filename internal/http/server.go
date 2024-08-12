@@ -19,7 +19,7 @@ type (
 	}
 
 	Cache struct {
-		house *cache.HouseCache
+		House *cache.HouseCache
 	}
 
 	server struct {
@@ -38,6 +38,6 @@ func newServer(useCases UseCases, cache Cache) (*server, error) {
 	return &server{
 		useCases:   useCases,
 		validator:  validator,
-		houseCache: cache.house,
+		houseCache: cache.House,
 	}, nil
 }

@@ -38,7 +38,7 @@ func NewUseCases(deps Dependencies) UseCases {
 
 	return UseCases{
 		Deps:  deps,
-		Flat:  NewFlatUseCase(pg.Flat, transactor),
+		Flat:  NewFlatUseCase(pg.Flat, pg.House, transactor),
 		House: NewHouseUseCase(pg.House, transactor),
 		Auth: NewAuthUseCase(AuthDeps{
 			TransactionManager: deps.Transactor,

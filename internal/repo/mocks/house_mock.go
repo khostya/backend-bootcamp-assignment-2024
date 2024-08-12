@@ -13,6 +13,7 @@ import (
 	domain "backend-bootcamp-assignment-2024/internal/domain"
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	gomock "go.uber.org/mock/gomock"
 )
@@ -68,4 +69,18 @@ func (m *MockhouseRepo) GetByID(ctx context.Context, id uint) (domain.House, err
 func (mr *MockhouseRepoMockRecorder) GetByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockhouseRepo)(nil).GetByID), ctx, id)
+}
+
+// UpdateLastFlatAddedAt mocks base method.
+func (m *MockhouseRepo) UpdateLastFlatAddedAt(ctx context.Context, id uint, lastFlatAddedAt time.Time) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateLastFlatAddedAt", ctx, id, lastFlatAddedAt)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateLastFlatAddedAt indicates an expected call of UpdateLastFlatAddedAt.
+func (mr *MockhouseRepoMockRecorder) UpdateLastFlatAddedAt(ctx, id, lastFlatAddedAt any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateLastFlatAddedAt", reflect.TypeOf((*MockhouseRepo)(nil).UpdateLastFlatAddedAt), ctx, id, lastFlatAddedAt)
 }

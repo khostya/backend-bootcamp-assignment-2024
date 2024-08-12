@@ -7,6 +7,7 @@ import (
 	"backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"context"
 	sq "github.com/Masterminds/squirrel"
+	"time"
 )
 
 const (
@@ -51,4 +52,15 @@ func (h House) GetByID(ctx context.Context, id uint) (domain.House, error) {
 	}
 
 	return schema.NewDomainHouse(house), nil
+}
+
+func (h House) UpdateLastFlatAddedAt(ctx context.Context, id uint, lastFlatAddedAt time.Time) error {
+	db := h.queryEngineProvider.GetQueryEngine(ctx)
+
+	query := sq.Update(houseTable).
+		Set("last_flat_added_at", lastFlatAddedAt).
+		Where("id = $1", id).
+		PlaceholderFormat(sq.Dollar)
+
+	return exec.Update(ctx, query, db)
 }

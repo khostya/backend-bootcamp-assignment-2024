@@ -23,8 +23,9 @@ type (
 	}
 )
 
-func NewFlatUseCase(repo flatRepo, manager transactionManager) Flat {
+func NewFlatUseCase(repo flatRepo, houseRepo houseRepo, manager transactionManager) Flat {
 	return Flat{
+		houseRepo:          houseRepo,
 		flatRepo:           repo,
 		transactionManager: manager,
 	}
@@ -40,7 +41,7 @@ func (uc Flat) Create(ctx context.Context, param dto.CreateFlatParam) (domain.Fl
 		}
 
 		flat.ID = ID
-		return uc.houseRepo.UpdateUpdatedAt(ctx, flat.HouseID, time.Now())
+		return uc.houseRepo.UpdateLastFlatAddedAt(ctx, flat.HouseID, time.Now())
 	})
 
 	return flat, uc.transactionManager.Unwrap(err)

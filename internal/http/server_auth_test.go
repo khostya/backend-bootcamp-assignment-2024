@@ -89,7 +89,7 @@ func TestServerAuth_Login(t *testing.T) {
 			mocks := newMocks(t)
 			tt.mockFn(mocks)
 
-			server, err := newServer(mocks.useCases, Cache{house: cache.NewHouseCache(0, 0)})
+			server, err := newServer(mocks.useCases, Cache{House: cache.NewHouseCache(0, 0)})
 			require.NoError(t, err)
 
 			status, _, err := server.postLogin(ctx, tt.input)
@@ -165,7 +165,7 @@ func TestServerAuth_Register(t *testing.T) {
 			mocks := newMocks(t)
 			tt.mockFn(mocks)
 
-			server, err := newServer(mocks.useCases, Cache{house: cache.NewHouseCache(0, 0)})
+			server, err := newServer(mocks.useCases, Cache{House: cache.NewHouseCache(0, 0)})
 			require.NoError(t, err)
 
 			status, _, err := server.postRegister(ctx, tt.input)

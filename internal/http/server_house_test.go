@@ -76,7 +76,7 @@ func TestServerHouse_postCreate(t *testing.T) {
 			mocks := newMocks(t)
 			tt.mockFn(ctx, mocks)
 
-			server, err := newServer(mocks.useCases, Cache{house: cache.NewHouseCache(0, 0)})
+			server, err := newServer(mocks.useCases, Cache{House: cache.NewHouseCache(0, 0)})
 			require.NoError(t, err)
 
 			status, _, err := server.postHouseCreate(ctx, tt.input)

@@ -15,6 +15,10 @@ type (
 	}
 
 	Cache struct {
+		House CacheHouse `yaml:"house"`
+	}
+
+	CacheHouse struct {
 		Capacity uint          `yaml:"capacity"`
 		TTL      time.Duration `yaml:"ttl"`
 	}

@@ -11,7 +11,7 @@ type (
 	houseRepo interface {
 		GetByID(ctx context.Context, id uint) (domain.House, error)
 		Create(ctx context.Context, house domain.House) (uint, error)
-		UpdateUpdatedAt(ctx context.Context, id uint, updatedAt time.Time) error
+		UpdateLastFlatAddedAt(ctx context.Context, id uint, updatedAt time.Time) error
 	}
 
 	House struct {

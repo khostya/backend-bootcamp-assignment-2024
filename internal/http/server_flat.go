@@ -68,10 +68,15 @@ func (s *server) PostFlatUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) postFlatUpdate(ctx context.Context, req api.PostFlatUpdateJSONBody) (int, domain.Flat, error) {
-	if ctx.Value(middleware.UserType) == domain.UserModerator {
+	userType, ok := ctx.Value(middleware.UserType).(domain.UserType)
+	if !ok || userType != domain.UserModerator {
 		return http.StatusUnauthorized, domain.Flat{}, errUnauthorized
 	}
-	moderatorID := ctx.Value(middleware.UserID).(uuid.UUID)
+
+	moderatorID, ok := ctx.Value(middleware.UserID).(uuid.UUID)
+	if !ok {
+		return http.StatusUnauthorized, domain.Flat{}, errUnauthorized
+	}
 
 	param := dto.UpdateFlatParam{Id: uint(req.Id), Status: string(req.Status), ModeratorID: moderatorID}
 	err := s.validator.Struct(param)

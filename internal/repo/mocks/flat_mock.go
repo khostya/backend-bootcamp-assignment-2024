@@ -14,6 +14,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	uuid "github.com/google/uuid"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -68,6 +69,20 @@ func (m *MockflatRepo) GetByID(ctx context.Context, id uint) (domain.Flat, error
 func (mr *MockflatRepoMockRecorder) GetByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockflatRepo)(nil).GetByID), ctx, id)
+}
+
+// SetModeratorID mocks base method.
+func (m *MockflatRepo) SetModeratorID(ctx context.Context, id uint, moderatorID *uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetModeratorID", ctx, id, moderatorID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetModeratorID indicates an expected call of SetModeratorID.
+func (mr *MockflatRepoMockRecorder) SetModeratorID(ctx, id, moderatorID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetModeratorID", reflect.TypeOf((*MockflatRepo)(nil).SetModeratorID), ctx, id, moderatorID)
 }
 
 // UpdateStatus mocks base method.
