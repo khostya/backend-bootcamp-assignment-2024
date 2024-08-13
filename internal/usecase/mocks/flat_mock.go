@@ -10,11 +10,11 @@
 package mock_usecase
 
 import (
-	domain "github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
-	dto "github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
 	context "context"
 	reflect "reflect"
 
+	domain "github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	dto "github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
 	gomock "go.uber.org/mock/gomock"
 )
 

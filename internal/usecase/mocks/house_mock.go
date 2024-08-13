@@ -10,11 +10,11 @@
 package mock_usecase
 
 import (
-	domain "github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
-	dto "github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
 	context "context"
 	reflect "reflect"
 
+	domain "github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	dto "github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -57,18 +57,18 @@ func (mr *MockhouseServiceMockRecorder) Create(ctx, param any) *gomock.Call {
 }
 
 // GetByID mocks base method.
-func (m *MockhouseService) GetByID(ctx context.Context, id uint) (domain.House, error) {
+func (m *MockhouseService) GetByID(ctx context.Context, id uint, userType domain.UserType) (domain.House, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", ctx, id)
+	ret := m.ctrl.Call(m, "GetByID", ctx, id, userType)
 	ret0, _ := ret[0].(domain.House)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByID indicates an expected call of GetByID.
-func (mr *MockhouseServiceMockRecorder) GetByID(ctx, id any) *gomock.Call {
+func (mr *MockhouseServiceMockRecorder) GetByID(ctx, id, userType any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockhouseService)(nil).GetByID), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockhouseService)(nil).GetByID), ctx, id, userType)
 }
 
 // Subscribe mocks base method.

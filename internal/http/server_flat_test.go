@@ -150,8 +150,8 @@ func TestServerFlat_postUpdate(t *testing.T) {
 			server, err := newServer(mocks.useCases, Cache{House: cache.NewHouseCache(0, 0)})
 			require.NoError(t, err)
 
-			ctx := context.WithValue(ctx, middleware.UserID, uuid.New())
-			ctx = context.WithValue(ctx, middleware.UserType, domain.UserModerator)
+			ctx := context.WithValue(ctx, middleware.KeyUserID, uuid.New())
+			ctx = context.WithValue(ctx, middleware.KeyUserType, domain.UserModerator)
 
 			status, _, err := server.postFlatUpdate(ctx, tt.input)
 			require.Equal(t, tt.wandErr, err != nil)

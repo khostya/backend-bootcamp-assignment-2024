@@ -37,7 +37,7 @@ func (f Flat) Create(ctx context.Context, flat domain.Flat) (uint, error) {
 func (f Flat) GetByID(ctx context.Context, id uint) (domain.Flat, error) {
 	db := f.queryEngineProvider.GetQueryEngine(ctx)
 
-	query := sq.Select(schema.Flat{}.Columns()...).
+	query := sq.Select(schema.Flat{}.SelectColumns()...).
 		From(flatTable).
 		Where("id = $1", id).
 		PlaceholderFormat(sq.Dollar)

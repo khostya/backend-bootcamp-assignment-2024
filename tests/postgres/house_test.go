@@ -15,6 +15,7 @@ import (
 type HousesTestSuite struct {
 	suite.Suite
 	ctx        context.Context
+	flatRepo   repo.Flat
 	houseRepo  repo.House
 	transactor *transactor.TransactionManager
 }
@@ -27,6 +28,7 @@ func (s *HousesTestSuite) SetupSuite() {
 	s.T().Parallel()
 	s.transactor = transactor.NewTransactionManager(db.GetPool())
 	s.houseRepo = repo.NewHouseRepo(s.transactor)
+	s.flatRepo = repo.NewFlatRepo(s.transactor)
 	s.ctx = context.Background()
 }
 
@@ -51,6 +53,31 @@ func (s *HousesTestSuite) TestGetByID() {
 	actual, err := s.houseRepo.GetByID(s.ctx, id)
 	require.NoError(s.T(), err)
 	require.EqualExportedValues(s.T(), houses, actual)
+}
+
+func (s *HousesTestSuite) TestGetFullByID() {
+	house := NewHouse()
+
+	id, err := s.houseRepo.Create(s.ctx, house)
+	require.NoError(s.T(), err)
+	house.ID = id
+
+	flat := NewFlats(house.ID)
+	idCreatedFlat, err := s.flatRepo.Create(s.ctx, flat)
+	require.NoError(s.T(), err)
+
+	flat.ID = idCreatedFlat
+	house.Flats = append(house.Flats, flat)
+
+	actual, err := s.houseRepo.GetFullByID(s.ctx, id, nil)
+	require.NoError(s.T(), err)
+	require.EqualExportedValues(s.T(), house, actual)
+
+	require.Len(s.T(), actual.Flats, len(house.Flats))
+
+	for i := range actual.Flats {
+		require.EqualExportedValues(s.T(), house.Flats[i], actual.Flats[i])
+	}
 }
 
 func (s *HousesTestSuite) TestUpdateLastFlatAddedAt() {

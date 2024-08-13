@@ -3,10 +3,10 @@
 package mock_repo
 
 import (
-	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 )
 
 // flatRepo ...

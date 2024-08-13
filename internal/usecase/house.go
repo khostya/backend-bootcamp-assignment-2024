@@ -12,6 +12,7 @@ type (
 		GetByID(ctx context.Context, id uint) (domain.House, error)
 		Create(ctx context.Context, house domain.House) (uint, error)
 		UpdateLastFlatAddedAt(ctx context.Context, id uint, updatedAt time.Time) error
+		GetFullByID(ctx context.Context, id uint, flatStatus *domain.FlatStatus) (domain.House, error)
 	}
 
 	House struct {
@@ -27,8 +28,13 @@ func NewHouseUseCase(repo houseRepo, manager transactionManager) House {
 	}
 }
 
-func (uc House) GetByID(ctx context.Context, id uint) (domain.House, error) {
-	return uc.houseRepo.GetByID(ctx, id)
+func (uc House) GetByID(ctx context.Context, id uint, userType domain.UserType) (domain.House, error) {
+	if userType == domain.UserClient {
+		status := domain.FlatApproved
+		return uc.houseRepo.GetFullByID(ctx, id, &status)
+	}
+
+	return uc.houseRepo.GetFullByID(ctx, id, nil)
 }
 
 func (uc House) Create(ctx context.Context, param dto.CreateHouseParam) (domain.House, error) {

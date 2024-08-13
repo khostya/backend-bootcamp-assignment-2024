@@ -10,15 +10,24 @@ import (
 func ScanOne[T any](ctx context.Context, query sq.SelectBuilder, db transactor.QueryEngine) (T, error) {
 	var defaultT T
 
-	rawQuery, args, err := query.ToSql()
+	records, err := ScanALL[T](ctx, query, db)
 	if err != nil {
 		return defaultT, err
 	}
 
-	var records []T
-	if err := pgxscan.Select(ctx, db, &records, rawQuery, args...); err != nil {
-		return defaultT, err
+	return records[0], nil
+}
+
+func ScanALL[T any](ctx context.Context, query sq.SelectBuilder, db transactor.QueryEngine) ([]T, error) {
+	rawQuery, args, err := query.ToSql()
+	if err != nil {
+		return nil, err
 	}
 
-	return records[0], nil
+	var records []T
+	if err := pgxscan.Select(ctx, db, &records, rawQuery, args...); err != nil {
+		return nil, err
+	}
+
+	return records, nil
 }

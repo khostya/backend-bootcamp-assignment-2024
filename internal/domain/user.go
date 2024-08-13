@@ -31,3 +31,7 @@ func NewUser(param dto.RegisterUserParam, hashedPassword string) User {
 		Password: hashedPassword,
 	}
 }
+
+func GetALLUserTypes() []UserType {
+	return []UserType{UserClient, UserModerator}
+}

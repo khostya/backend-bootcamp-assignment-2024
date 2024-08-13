@@ -8,21 +8,17 @@ import (
 
 type (
 	Flat struct {
-		ID          uint   `db:"id"`
+		ID          uint   `db:"flat_id"`
 		HouseID     uint   `db:"house_id"`
 		Price       uint   `db:"price"`
 		Rooms       uint   `db:"rooms"`
-		Status      string `db:"status"`
+		Status      string `db:"flat_status"`
 		ModeratorID sql.Null[uuid.UUID]
 	}
 )
 
-func (f Flat) Values() []any {
-	return []any{f.ID, f.HouseID, f.Price, f.Rooms, f.Status, f.ModeratorID}
-}
-
-func (f Flat) Columns() []string {
-	return []string{"id", "house_id", "price", "rooms", "status", "moderator_id"}
+func (f Flat) SelectColumns() []string {
+	return []string{"flats.id as flat_id", "house_id", "price", "rooms", "flats.status as flat_status", "moderator_id"}
 }
 
 func (f Flat) InsertValues() []any {

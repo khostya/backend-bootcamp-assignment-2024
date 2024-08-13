@@ -10,11 +10,11 @@
 package mock_repo
 
 import (
-	domain "github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 	context "context"
 	reflect "reflect"
 	time "time"
 
+	domain "github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -69,6 +69,21 @@ func (m *MockhouseRepo) GetByID(ctx context.Context, id uint) (domain.House, err
 func (mr *MockhouseRepoMockRecorder) GetByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockhouseRepo)(nil).GetByID), ctx, id)
+}
+
+// GetFullByID mocks base method.
+func (m *MockhouseRepo) GetFullByID(ctx context.Context, id uint, flatStatus *domain.FlatStatus) (domain.House, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFullByID", ctx, id, flatStatus)
+	ret0, _ := ret[0].(domain.House)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFullByID indicates an expected call of GetFullByID.
+func (mr *MockhouseRepoMockRecorder) GetFullByID(ctx, id, flatStatus any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFullByID", reflect.TypeOf((*MockhouseRepo)(nil).GetFullByID), ctx, id, flatStatus)
 }
 
 // UpdateLastFlatAddedAt mocks base method.

@@ -3,14 +3,15 @@
 package mock_usecase
 
 import (
+	"context"
+
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
-	"context"
 )
 
 // houseService ...
 type houseService interface {
-	GetByID(ctx context.Context, id uint) (domain.House, error)
+	GetByID(ctx context.Context, id uint, userType domain.UserType) (domain.House, error)
 	Create(ctx context.Context, param dto.CreateHouseParam) (domain.House, error)
 	Subscribe(ctx context.Context, id int, email string) error
 }

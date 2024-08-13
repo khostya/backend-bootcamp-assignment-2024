@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	UserID   = "userID"
-	UserType = "user type"
+	KeyUserID   = "userID"
+	KeyUserType = "user type"
 )
 
 func AuthData(manager auth.TokenManager) func(http.Handler) http.Handler {
@@ -23,14 +23,14 @@ func AuthData(manager auth.TokenManager) func(http.Handler) http.Handler {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
-			r = r.WithContext(context.WithValue(r.Context(), UserID, userID))
+			r = r.WithContext(context.WithValue(r.Context(), KeyUserID, userID))
 
 			userType, err := manager.ExtractUserType(tokenHeader)
 			if err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
-			r = r.WithContext(context.WithValue(r.Context(), UserType, domain.UserType(userType)))
+			r = r.WithContext(context.WithValue(r.Context(), KeyUserType, domain.UserType(userType)))
 
 			next.ServeHTTP(w, r)
 			return
