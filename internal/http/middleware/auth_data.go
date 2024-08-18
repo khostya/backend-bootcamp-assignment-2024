@@ -20,25 +20,19 @@ func AuthData(manager auth.TokenManager) func(http.Handler) http.Handler {
 			tokenHeader := strings.Split(r.Header.Get("Authorization"), " ")
 
 			userID, err := manager.ExtractUserId(tokenHeader)
-			if err != nil {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
+			if err == nil {
+				r = r.WithContext(context.WithValue(r.Context(), KeyUserID, userID))
 			}
-			r = r.WithContext(context.WithValue(r.Context(), KeyUserID, userID))
 
 			userType, err := manager.ExtractUserType(tokenHeader)
-			if err != nil {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
+			if err == nil {
+				r = r.WithContext(context.WithValue(r.Context(), KeyUserType, domain.UserType(userType)))
 			}
-			r = r.WithContext(context.WithValue(r.Context(), KeyUserType, domain.UserType(userType)))
 
 			isDummy, err := manager.ExtractIsDummy(tokenHeader)
-			if err != nil {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
+			if err == nil {
+				r = r.WithContext(context.WithValue(r.Context(), KeyIsDummy, isDummy))
 			}
-			r = r.WithContext(context.WithValue(r.Context(), KeyIsDummy, isDummy))
 
 			next.ServeHTTP(w, r)
 			return

@@ -4,6 +4,7 @@ import (
 	"context"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/repoerr"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 )
 
@@ -13,6 +14,10 @@ func ScanOne[T any](ctx context.Context, query sq.SelectBuilder, db transactor.Q
 	records, err := ScanALL[T](ctx, query, db)
 	if err != nil {
 		return defaultT, err
+	}
+
+	if len(records) == 0 {
+		return defaultT, repoerr.ErrNotFound
 	}
 
 	return records[0], nil

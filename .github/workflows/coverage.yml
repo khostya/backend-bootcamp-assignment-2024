@@ -31,6 +31,32 @@ jobs:
         run: "TEST_DATABASE_URL=postgres://postgres:password@localhost:5430/postgres?sslmode=disable \
             go test ./tests/postgres/... -tags=integration"
 
+  integration-http:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.5'
+
+      - name: Set Up Goose
+        run: "go install github.com/pressly/goose/v3/cmd/goose@latest"
+
+      - name: Up Server
+        run: "docker compose -f docker-compose-test.yml up -d"
+
+      - name: Migrate
+        run: "sleep 1m && goose -dir ./migrations postgres postgres://postgres:password@localhost:5430/postgres?sslmode=disable up"
+
+      - name: Install dependencies
+        run: "go mod tidy"
+
+      - name: Integration tests
+        run: "TEST_HTTP_ENDPOINT=http://localhost:8080 \
+            go test ./tests/http/... -tags=integration"
+
   unit-test:
     runs-on: ubuntu-latest
     steps:

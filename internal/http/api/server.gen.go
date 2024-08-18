@@ -7,119 +7,66 @@ package api
 
 import (
 	"bytes"
-	"compress/gzip"
 	"context"
-	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
-	"path"
 	"strings"
-	"time"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	externalRef0 "github.com/khostya/backend-bootcamp-assignment-2024/internal/http/api/models"
 	"github.com/oapi-codegen/runtime"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 const (
 	BearerAuthScopes = "bearerAuth.Scopes"
 )
 
-// Defines values for Status.
-const (
-	Approved     Status = "approved"
-	Created      Status = "created"
-	Declined     Status = "declined"
-	OnModeration Status = "on moderation"
-)
-
-// Defines values for UserType.
-const (
-	Client    UserType = "client"
-	Moderator UserType = "moderator"
-)
-
 // Address Адрес дома
-type Address = string
-
-// Date Дата + время
-type Date = time.Time
+type Address = externalRef0.Address
 
 // Developer Застройщик
-type Developer = string
+type Developer = externalRef0.Developer
 
 // Email Email пользователя
-type Email = openapi_types.Email
+type Email = externalRef0.Email
 
 // Flat Квартира
-type Flat struct {
-	// HouseId Идентификатор дома
-	HouseId HouseId `json:"house_id"`
-
-	// Id Идентификатор квартиры
-	Id FlatId `json:"id"`
-
-	// Price Цена квартиры в у.е.
-	Price Price `json:"price"`
-
-	// Rooms Количество комнат в квартире
-	Rooms Rooms `json:"rooms"`
-
-	// Status Статус квартиры
-	Status Status `json:"status"`
-}
+type Flat = externalRef0.Flat
 
 // FlatId Идентификатор квартиры
-type FlatId = int
+type FlatId = externalRef0.FlatId
 
 // House Дом
-type House struct {
-	// Address Адрес дома
-	Address Address `json:"address"`
-
-	// CreatedAt Дата + время
-	CreatedAt *Date `json:"created_at,omitempty"`
-
-	// Developer Застройщик
-	Developer *Developer `json:"developer"`
-
-	// Id Идентификатор дома
-	Id HouseId `json:"id"`
-
-	// UpdateAt Дата + время
-	UpdateAt *Date `json:"update_at,omitempty"`
-
-	// Year Год постройки дома
-	Year Year `json:"year"`
-}
+type House = externalRef0.House
 
 // HouseId Идентификатор дома
-type HouseId = int
+type HouseId = externalRef0.HouseId
 
 // Password Пароль пользователя
-type Password = string
+type Password = externalRef0.Password
 
 // Price Цена квартиры в у.е.
-type Price = int
+type Price = externalRef0.Price
 
 // Rooms Количество комнат в квартире
-type Rooms = int
+type Rooms = externalRef0.Rooms
 
 // Status Статус квартиры
-type Status string
+type Status = externalRef0.Status
 
 // Token Авторизационный токен
-type Token = string
+type Token = externalRef0.Token
 
 // UserId Идентификатор пользователя
-type UserId = openapi_types.UUID
+type UserId = externalRef0.UserId
 
 // UserType Тип пользователя
-type UserType string
+type UserType = externalRef0.UserType
 
 // Year Год постройки дома
-type Year = int
+type Year = externalRef0.Year
 
 // N5xx defines model for 5xx.
 type N5xx struct {
@@ -216,6 +163,1400 @@ type PostLoginJSONRequestBody PostLoginJSONBody
 // PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
 type PostRegisterJSONRequestBody PostRegisterJSONBody
 
+// RequestEditorFn  is the function signature for the RequestEditor callback function
+type RequestEditorFn func(ctx context.Context, req *http.Request) error
+
+// Doer performs HTTP requests.
+//
+// The standard http.Client implements this interface.
+type HttpRequestDoer interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+// Client which conforms to the OpenAPI3 specification for this service.
+type Client struct {
+	// The endpoint of the server conforming to this interface, with scheme,
+	// https://api.deepmap.com for example. This can contain a path relative
+	// to the server, such as https://api.deepmap.com/dev-test, and all the
+	// paths in the swagger spec will be appended to the server.
+	Server string
+
+	// Doer for performing requests, typically a *http.Client with any
+	// customized settings, such as certificate chains.
+	Client HttpRequestDoer
+
+	// A list of callbacks for modifying requests which are generated before sending over
+	// the network.
+	RequestEditors []RequestEditorFn
+}
+
+// ClientOption allows setting custom parameters during construction
+type ClientOption func(*Client) error
+
+// Creates a new Client, with reasonable defaults
+func NewClient(server string, opts ...ClientOption) (*Client, error) {
+	// create a client with sane default values
+	client := Client{
+		Server: server,
+	}
+	// mutate client and add all optional params
+	for _, o := range opts {
+		if err := o(&client); err != nil {
+			return nil, err
+		}
+	}
+	// ensure the server URL always has a trailing slash
+	if !strings.HasSuffix(client.Server, "/") {
+		client.Server += "/"
+	}
+	// create httpClient, if not already present
+	if client.Client == nil {
+		client.Client = &http.Client{}
+	}
+	return &client, nil
+}
+
+// WithHTTPClient allows overriding the default Doer, which is
+// automatically created using http.Client. This is useful for tests.
+func WithHTTPClient(doer HttpRequestDoer) ClientOption {
+	return func(c *Client) error {
+		c.Client = doer
+		return nil
+	}
+}
+
+// WithRequestEditorFn allows setting up a callback function, which will be
+// called right before sending the request. This can be used to mutate the request.
+func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
+	return func(c *Client) error {
+		c.RequestEditors = append(c.RequestEditors, fn)
+		return nil
+	}
+}
+
+// The interface specification for the client above.
+type ClientInterface interface {
+	// GetDummyLogin request
+	GetDummyLogin(ctx context.Context, params *GetDummyLoginParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostFlatCreateWithBody request with any body
+	PostFlatCreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostFlatCreate(ctx context.Context, body PostFlatCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostFlatUpdateWithBody request with any body
+	PostFlatUpdateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostFlatUpdate(ctx context.Context, body PostFlatUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostHouseCreateWithBody request with any body
+	PostHouseCreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostHouseCreate(ctx context.Context, body PostHouseCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetHouseId request
+	GetHouseId(ctx context.Context, id HouseId, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostHouseIdSubscribeWithBody request with any body
+	PostHouseIdSubscribeWithBody(ctx context.Context, id HouseId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostHouseIdSubscribe(ctx context.Context, id HouseId, body PostHouseIdSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostLoginWithBody request with any body
+	PostLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostLogin(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostRegisterWithBody request with any body
+	PostRegisterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostRegister(ctx context.Context, body PostRegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetUser request
+	GetUser(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) GetDummyLogin(ctx context.Context, params *GetDummyLoginParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetDummyLoginRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostFlatCreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostFlatCreateRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostFlatCreate(ctx context.Context, body PostFlatCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostFlatCreateRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostFlatUpdateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostFlatUpdateRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostFlatUpdate(ctx context.Context, body PostFlatUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostFlatUpdateRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostHouseCreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostHouseCreateRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostHouseCreate(ctx context.Context, body PostHouseCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostHouseCreateRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetHouseId(ctx context.Context, id HouseId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetHouseIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostHouseIdSubscribeWithBody(ctx context.Context, id HouseId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostHouseIdSubscribeRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostHouseIdSubscribe(ctx context.Context, id HouseId, body PostHouseIdSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostHouseIdSubscribeRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostLoginRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostLogin(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostLoginRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostRegisterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostRegisterRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostRegister(ctx context.Context, body PostRegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostRegisterRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetUser(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetUserRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// NewGetDummyLoginRequest generates requests for GetDummyLogin
+func NewGetDummyLoginRequest(server string, params *GetDummyLoginParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/dummyLogin")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "user_type", runtime.ParamLocationQuery, params.UserType); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostFlatCreateRequest calls the generic PostFlatCreate builder with application/json body
+func NewPostFlatCreateRequest(server string, body PostFlatCreateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostFlatCreateRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostFlatCreateRequestWithBody generates requests for PostFlatCreate with any type of body
+func NewPostFlatCreateRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/flat/create")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostFlatUpdateRequest calls the generic PostFlatUpdate builder with application/json body
+func NewPostFlatUpdateRequest(server string, body PostFlatUpdateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostFlatUpdateRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostFlatUpdateRequestWithBody generates requests for PostFlatUpdate with any type of body
+func NewPostFlatUpdateRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/flat/update")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostHouseCreateRequest calls the generic PostHouseCreate builder with application/json body
+func NewPostHouseCreateRequest(server string, body PostHouseCreateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostHouseCreateRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostHouseCreateRequestWithBody generates requests for PostHouseCreate with any type of body
+func NewPostHouseCreateRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/house/create")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetHouseIdRequest generates requests for GetHouseId
+func NewGetHouseIdRequest(server string, id HouseId) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/house/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostHouseIdSubscribeRequest calls the generic PostHouseIdSubscribe builder with application/json body
+func NewPostHouseIdSubscribeRequest(server string, id HouseId, body PostHouseIdSubscribeJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostHouseIdSubscribeRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPostHouseIdSubscribeRequestWithBody generates requests for PostHouseIdSubscribe with any type of body
+func NewPostHouseIdSubscribeRequestWithBody(server string, id HouseId, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/house/%s/subscribe", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostLoginRequest calls the generic PostLogin builder with application/json body
+func NewPostLoginRequest(server string, body PostLoginJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostLoginRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostLoginRequestWithBody generates requests for PostLogin with any type of body
+func NewPostLoginRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/login")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostRegisterRequest calls the generic PostRegister builder with application/json body
+func NewPostRegisterRequest(server string, body PostRegisterJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostRegisterRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostRegisterRequestWithBody generates requests for PostRegister with any type of body
+func NewPostRegisterRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/register")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetUserRequest generates requests for GetUser
+func NewGetUserRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/user")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
+	for _, r := range c.RequestEditors {
+		if err := r(ctx, req); err != nil {
+			return err
+		}
+	}
+	for _, r := range additionalEditors {
+		if err := r(ctx, req); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ClientWithResponses builds on ClientInterface to offer response payloads
+type ClientWithResponses struct {
+	ClientInterface
+}
+
+// NewClientWithResponses creates a new ClientWithResponses, which wraps
+// Client with return type handling
+func NewClientWithResponses(server string, opts ...ClientOption) (*ClientWithResponses, error) {
+	client, err := NewClient(server, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &ClientWithResponses{client}, nil
+}
+
+// WithBaseURL overrides the baseURL.
+func WithBaseURL(baseURL string) ClientOption {
+	return func(c *Client) error {
+		newBaseURL, err := url.Parse(baseURL)
+		if err != nil {
+			return err
+		}
+		c.Server = newBaseURL.String()
+		return nil
+	}
+}
+
+// ClientWithResponsesInterface is the interface specification for the client with responses above.
+type ClientWithResponsesInterface interface {
+	// GetDummyLoginWithResponse request
+	GetDummyLoginWithResponse(ctx context.Context, params *GetDummyLoginParams, reqEditors ...RequestEditorFn) (*GetDummyLoginResponse, error)
+
+	// PostFlatCreateWithBodyWithResponse request with any body
+	PostFlatCreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostFlatCreateResponse, error)
+
+	PostFlatCreateWithResponse(ctx context.Context, body PostFlatCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostFlatCreateResponse, error)
+
+	// PostFlatUpdateWithBodyWithResponse request with any body
+	PostFlatUpdateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostFlatUpdateResponse, error)
+
+	PostFlatUpdateWithResponse(ctx context.Context, body PostFlatUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostFlatUpdateResponse, error)
+
+	// PostHouseCreateWithBodyWithResponse request with any body
+	PostHouseCreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostHouseCreateResponse, error)
+
+	PostHouseCreateWithResponse(ctx context.Context, body PostHouseCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostHouseCreateResponse, error)
+
+	// GetHouseIdWithResponse request
+	GetHouseIdWithResponse(ctx context.Context, id HouseId, reqEditors ...RequestEditorFn) (*GetHouseIdResponse, error)
+
+	// PostHouseIdSubscribeWithBodyWithResponse request with any body
+	PostHouseIdSubscribeWithBodyWithResponse(ctx context.Context, id HouseId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostHouseIdSubscribeResponse, error)
+
+	PostHouseIdSubscribeWithResponse(ctx context.Context, id HouseId, body PostHouseIdSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*PostHouseIdSubscribeResponse, error)
+
+	// PostLoginWithBodyWithResponse request with any body
+	PostLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostLoginResponse, error)
+
+	PostLoginWithResponse(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*PostLoginResponse, error)
+
+	// PostRegisterWithBodyWithResponse request with any body
+	PostRegisterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostRegisterResponse, error)
+
+	PostRegisterWithResponse(ctx context.Context, body PostRegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*PostRegisterResponse, error)
+
+	// GetUserWithResponse request
+	GetUserWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetUserResponse, error)
+}
+
+type GetDummyLoginResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		// Token Авторизационный токен
+		Token *Token `json:"token,omitempty"`
+	}
+	JSON500 *N5xx
+}
+
+// Status returns HTTPResponse.Status
+func (r GetDummyLoginResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetDummyLoginResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostFlatCreateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Flat
+	JSON500      *N5xx
+}
+
+// Status returns HTTPResponse.Status
+func (r PostFlatCreateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostFlatCreateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostFlatUpdateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Flat
+	JSON500      *N5xx
+}
+
+// Status returns HTTPResponse.Status
+func (r PostFlatUpdateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostFlatUpdateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostHouseCreateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *House
+	JSON500      *N5xx
+}
+
+// Status returns HTTPResponse.Status
+func (r PostHouseCreateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostHouseCreateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetHouseIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Flats []Flat `json:"flats"`
+	}
+	JSON500 *N5xx
+}
+
+// Status returns HTTPResponse.Status
+func (r GetHouseIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetHouseIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostHouseIdSubscribeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON500      *N5xx
+}
+
+// Status returns HTTPResponse.Status
+func (r PostHouseIdSubscribeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostHouseIdSubscribeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostLoginResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		// Token Авторизационный токен
+		Token *Token `json:"token,omitempty"`
+	}
+	JSON500 *N5xx
+}
+
+// Status returns HTTPResponse.Status
+func (r PostLoginResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostLoginResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostRegisterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		// UserId Идентификатор пользователя
+		UserId *UserId `json:"user_id,omitempty"`
+	}
+	JSON500 *N5xx
+}
+
+// Status returns HTTPResponse.Status
+func (r PostRegisterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostRegisterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		// Email Email пользователя
+		Email Email `json:"email"`
+
+		// UserId Идентификатор пользователя
+		UserId UserId `json:"user_id"`
+
+		// UserType Тип пользователя
+		UserType UserType `json:"user_type"`
+	}
+	JSON500 *N5xx
+}
+
+// Status returns HTTPResponse.Status
+func (r GetUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// GetDummyLoginWithResponse request returning *GetDummyLoginResponse
+func (c *ClientWithResponses) GetDummyLoginWithResponse(ctx context.Context, params *GetDummyLoginParams, reqEditors ...RequestEditorFn) (*GetDummyLoginResponse, error) {
+	rsp, err := c.GetDummyLogin(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetDummyLoginResponse(rsp)
+}
+
+// PostFlatCreateWithBodyWithResponse request with arbitrary body returning *PostFlatCreateResponse
+func (c *ClientWithResponses) PostFlatCreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostFlatCreateResponse, error) {
+	rsp, err := c.PostFlatCreateWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostFlatCreateResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostFlatCreateWithResponse(ctx context.Context, body PostFlatCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostFlatCreateResponse, error) {
+	rsp, err := c.PostFlatCreate(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostFlatCreateResponse(rsp)
+}
+
+// PostFlatUpdateWithBodyWithResponse request with arbitrary body returning *PostFlatUpdateResponse
+func (c *ClientWithResponses) PostFlatUpdateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostFlatUpdateResponse, error) {
+	rsp, err := c.PostFlatUpdateWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostFlatUpdateResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostFlatUpdateWithResponse(ctx context.Context, body PostFlatUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostFlatUpdateResponse, error) {
+	rsp, err := c.PostFlatUpdate(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostFlatUpdateResponse(rsp)
+}
+
+// PostHouseCreateWithBodyWithResponse request with arbitrary body returning *PostHouseCreateResponse
+func (c *ClientWithResponses) PostHouseCreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostHouseCreateResponse, error) {
+	rsp, err := c.PostHouseCreateWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostHouseCreateResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostHouseCreateWithResponse(ctx context.Context, body PostHouseCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostHouseCreateResponse, error) {
+	rsp, err := c.PostHouseCreate(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostHouseCreateResponse(rsp)
+}
+
+// GetHouseIdWithResponse request returning *GetHouseIdResponse
+func (c *ClientWithResponses) GetHouseIdWithResponse(ctx context.Context, id HouseId, reqEditors ...RequestEditorFn) (*GetHouseIdResponse, error) {
+	rsp, err := c.GetHouseId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetHouseIdResponse(rsp)
+}
+
+// PostHouseIdSubscribeWithBodyWithResponse request with arbitrary body returning *PostHouseIdSubscribeResponse
+func (c *ClientWithResponses) PostHouseIdSubscribeWithBodyWithResponse(ctx context.Context, id HouseId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostHouseIdSubscribeResponse, error) {
+	rsp, err := c.PostHouseIdSubscribeWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostHouseIdSubscribeResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostHouseIdSubscribeWithResponse(ctx context.Context, id HouseId, body PostHouseIdSubscribeJSONRequestBody, reqEditors ...RequestEditorFn) (*PostHouseIdSubscribeResponse, error) {
+	rsp, err := c.PostHouseIdSubscribe(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostHouseIdSubscribeResponse(rsp)
+}
+
+// PostLoginWithBodyWithResponse request with arbitrary body returning *PostLoginResponse
+func (c *ClientWithResponses) PostLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostLoginResponse, error) {
+	rsp, err := c.PostLoginWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostLoginResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostLoginWithResponse(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*PostLoginResponse, error) {
+	rsp, err := c.PostLogin(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostLoginResponse(rsp)
+}
+
+// PostRegisterWithBodyWithResponse request with arbitrary body returning *PostRegisterResponse
+func (c *ClientWithResponses) PostRegisterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostRegisterResponse, error) {
+	rsp, err := c.PostRegisterWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostRegisterResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostRegisterWithResponse(ctx context.Context, body PostRegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*PostRegisterResponse, error) {
+	rsp, err := c.PostRegister(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostRegisterResponse(rsp)
+}
+
+// GetUserWithResponse request returning *GetUserResponse
+func (c *ClientWithResponses) GetUserWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetUserResponse, error) {
+	rsp, err := c.GetUser(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetUserResponse(rsp)
+}
+
+// ParseGetDummyLoginResponse parses an HTTP response from a GetDummyLoginWithResponse call
+func ParseGetDummyLoginResponse(rsp *http.Response) (*GetDummyLoginResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetDummyLoginResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			// Token Авторизационный токен
+			Token *Token `json:"token,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest N5xx
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostFlatCreateResponse parses an HTTP response from a PostFlatCreateWithResponse call
+func ParsePostFlatCreateResponse(rsp *http.Response) (*PostFlatCreateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostFlatCreateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Flat
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest N5xx
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostFlatUpdateResponse parses an HTTP response from a PostFlatUpdateWithResponse call
+func ParsePostFlatUpdateResponse(rsp *http.Response) (*PostFlatUpdateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostFlatUpdateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Flat
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest N5xx
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostHouseCreateResponse parses an HTTP response from a PostHouseCreateWithResponse call
+func ParsePostHouseCreateResponse(rsp *http.Response) (*PostHouseCreateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostHouseCreateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest House
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest N5xx
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetHouseIdResponse parses an HTTP response from a GetHouseIdWithResponse call
+func ParseGetHouseIdResponse(rsp *http.Response) (*GetHouseIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetHouseIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Flats []Flat `json:"flats"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest N5xx
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostHouseIdSubscribeResponse parses an HTTP response from a PostHouseIdSubscribeWithResponse call
+func ParsePostHouseIdSubscribeResponse(rsp *http.Response) (*PostHouseIdSubscribeResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostHouseIdSubscribeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest N5xx
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostLoginResponse parses an HTTP response from a PostLoginWithResponse call
+func ParsePostLoginResponse(rsp *http.Response) (*PostLoginResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostLoginResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			// Token Авторизационный токен
+			Token *Token `json:"token,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest N5xx
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostRegisterResponse parses an HTTP response from a PostRegisterWithResponse call
+func ParsePostRegisterResponse(rsp *http.Response) (*PostRegisterResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostRegisterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			// UserId Идентификатор пользователя
+			UserId *UserId `json:"user_id,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest N5xx
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetUserResponse parses an HTTP response from a GetUserWithResponse call
+func ParseGetUserResponse(rsp *http.Response) (*GetUserResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			// Email Email пользователя
+			Email Email `json:"email"`
+
+			// UserId Идентификатор пользователя
+			UserId UserId `json:"user_id"`
+
+			// UserType Тип пользователя
+			UserType UserType `json:"user_type"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest N5xx
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
@@ -242,6 +1583,9 @@ type ServerInterface interface {
 
 	// (POST /register)
 	PostRegister(w http.ResponseWriter, r *http.Request)
+
+	// (GET /user)
+	GetUser(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -425,6 +1769,23 @@ func (siw *ServerInterfaceWrapper) PostRegister(w http.ResponseWriter, r *http.R
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// GetUser operation middleware
+func (siw *ServerInterfaceWrapper) GetUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUser(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -547,123 +1908,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("POST "+options.BaseURL+"/house/{id}/subscribe", wrapper.PostHouseIdSubscribe)
 	m.HandleFunc("POST "+options.BaseURL+"/login", wrapper.PostLogin)
 	m.HandleFunc("POST "+options.BaseURL+"/register", wrapper.PostRegister)
+	m.HandleFunc("GET "+options.BaseURL+"/user", wrapper.GetUser)
 
 	return m
-}
-
-// Base64 encoded, gzipped, json marshaled Swagger object
-var swaggerSpec = []string{
-
-	"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",
-}
-
-// GetSwagger returns the content of the embedded swagger specification file
-// or error if failed to decode
-func decodeSpec() ([]byte, error) {
-	zipped, err := base64.StdEncoding.DecodeString(strings.Join(swaggerSpec, ""))
-	if err != nil {
-		return nil, fmt.Errorf("error base64 decoding spec: %w", err)
-	}
-	zr, err := gzip.NewReader(bytes.NewReader(zipped))
-	if err != nil {
-		return nil, fmt.Errorf("error decompressing spec: %w", err)
-	}
-	var buf bytes.Buffer
-	_, err = buf.ReadFrom(zr)
-	if err != nil {
-		return nil, fmt.Errorf("error decompressing spec: %w", err)
-	}
-
-	return buf.Bytes(), nil
-}
-
-var rawSpec = decodeSpecCached()
-
-// a naive cached of a decoded swagger spec
-func decodeSpecCached() func() ([]byte, error) {
-	data, err := decodeSpec()
-	return func() ([]byte, error) {
-		return data, err
-	}
-}
-
-// Constructs a synthetic filesystem for resolving external references when loading openapi specifications.
-func PathToRawSpec(pathToFile string) map[string]func() ([]byte, error) {
-	res := make(map[string]func() ([]byte, error))
-	if len(pathToFile) > 0 {
-		res[pathToFile] = rawSpec
-	}
-
-	return res
-}
-
-// GetSwagger returns the Swagger specification corresponding to the generated code
-// in this file. The external references of Swagger specification are resolved.
-// The logic of resolving external references is tightly connected to "import-mapping" feature.
-// Externally referenced files must be embedded in the corresponding golang packages.
-// Urls can be supported but this task was out of the scope.
-func GetSwagger() (swagger *openapi3.T, err error) {
-	resolvePath := PathToRawSpec("")
-
-	loader := openapi3.NewLoader()
-	loader.IsExternalRefsAllowed = true
-	loader.ReadFromURIFunc = func(loader *openapi3.Loader, url *url.URL) ([]byte, error) {
-		pathToFile := url.String()
-		pathToFile = path.Clean(pathToFile)
-		getSpec, ok := resolvePath[pathToFile]
-		if !ok {
-			err1 := fmt.Errorf("path not found: %s", pathToFile)
-			return nil, err1
-		}
-		return getSpec()
-	}
-	var specData []byte
-	specData, err = rawSpec()
-	if err != nil {
-		return
-	}
-	swagger, err = loader.LoadFromData(specData)
-	if err != nil {
-		return
-	}
-	return
 }

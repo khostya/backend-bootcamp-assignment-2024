@@ -37,7 +37,8 @@ func (s *server) PostHouseCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) postHouseCreate(ctx context.Context, req api.PostHouseCreateJSONBody) (int, domain.House, error) {
-	if ctx.Value(middleware.KeyUserType) == domain.UserModerator {
+	userType, ok := ctx.Value(middleware.KeyUserType).(domain.UserType)
+	if !ok || userType != domain.UserModerator {
 		return http.StatusUnauthorized, domain.House{}, errUnauthorized
 	}
 
@@ -88,7 +89,7 @@ func (s *server) GetHouseId(w http.ResponseWriter, r *http.Request, id api.House
 }
 
 func (s *server) PostHouseIdSubscribe(w http.ResponseWriter, r *http.Request, id api.HouseId) {
-	isDummy, ok := r.Context().Value(middleware.KeyUserID).(bool)
+	isDummy, ok := r.Context().Value(middleware.KeyIsDummy).(bool)
 	if !ok || isDummy {
 		s.error(w, r, http.StatusUnauthorized, errUnauthorized)
 		return

@@ -16,6 +16,7 @@ type (
 		Flat  flatUseCase
 		House houseUseCase
 		Auth  authUseCase
+		User  userUseCase
 	}
 
 	Cache struct {

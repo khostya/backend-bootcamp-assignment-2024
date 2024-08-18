@@ -35,6 +35,7 @@ func Run(ctx context.Context, cfg config.Config) error {
 			Flat:  useCases.Flat,
 			House: useCases.House,
 			Auth:  useCases.Auth,
+			User:  useCases.User,
 		},
 		deps.TokenManager,
 	)

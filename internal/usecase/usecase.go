@@ -32,6 +32,7 @@ type (
 		House House
 		Deps  Dependencies
 		Auth  Auth
+		User  User
 	}
 )
 
@@ -50,5 +51,6 @@ func NewUseCases(deps Dependencies) UseCases {
 			TokenManager:       deps.TokenManager,
 			AccessTokenTTL:     deps.AccessTokenTTL,
 		}),
+		User: NewUserUseCase(pg.User),
 	}
 }
