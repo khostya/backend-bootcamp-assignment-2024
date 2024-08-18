@@ -4,13 +4,16 @@ services:
   server:
     container_name: server
     environment:
-      PG_URL: postgres://user:password@postgres:5431/postgres?sslmode=disable
+      DATABASE_URL: postgres://postgres:password@postgres:5432/postgres?sslmode=disable
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     depends_on:
+      - postgres
+    networks:
+      - backend
       - postgres
 
   postgres:
@@ -37,4 +40,28 @@ services:
         limits:
           cpus: '1'
           memory: 4G
+    networks:
+      - postgres
 
+  integration-http:
+    build:
+      context: .
+      dockerfile: ./tests/http/Dockerfile
+    environment:
+      TEST_HTTP_ENDPOINT: http://server:8080
+    container_name: integration
+    image: integration-http
+    depends_on:
+      - server
+    networks:
+      - backend
+
+volumes:
+  postgres:
+    name: postgres
+
+networks:
+  postgres:
+    name: postgres
+  backend:
+    name: backend

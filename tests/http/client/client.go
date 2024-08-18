@@ -18,7 +18,7 @@ func New() *api.Client {
 
 	client, err := api.NewClient(server)
 	if err != nil {
-		panic(fmt.Sprintf("undeined env %s", endpointENV))
+		panic(err)
 	}
 
 	return client

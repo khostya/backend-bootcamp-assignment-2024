@@ -54,7 +54,7 @@ func createHouse(ctx context.Context, t *testing.T) (*api.House, userResult, api
 
 	response, err := api.ParsePostHouseCreateResponse(resp)
 	require.NoError(t, err)
-	require.Equal(t, http.StatusOK, response.StatusCode())
+	require.Equal(t, http.StatusOK, response.StatusCode(), string(response.Body))
 
 	return response.JSON200, user, token
 }
@@ -69,5 +69,5 @@ func (s *HouseTestSuite) TestSubscribe() {
 
 	response, err := api.ParsePostHouseIdSubscribeResponse(resp)
 	require.NoError(s.T(), err)
-	require.Equal(s.T(), http.StatusOK, response.StatusCode())
+	require.Equal(s.T(), http.StatusOK, response.StatusCode(), string(response.Body))
 }

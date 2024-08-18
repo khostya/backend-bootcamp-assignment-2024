@@ -63,7 +63,7 @@ func createFlat(ctx context.Context, t *testing.T) (*api.House, api.Flat, api.To
 		Rooms:   flatReq.Rooms,
 		Status:  model.Created,
 	}
-	require.Equal(t, flat, *response.JSON200)
+	require.Equal(t, flat, *response.JSON200, string(response.Body))
 
 	return house, flat, token
 }
@@ -77,7 +77,7 @@ func (s *FlatTestSuite) TestGet() {
 	response, err := api.ParseGetHouseIdResponse(resp)
 	require.NoError(s.T(), err)
 
-	require.Equal(s.T(), []api.Flat{flat}, response.JSON200.Flats)
+	require.Equal(s.T(), []api.Flat{flat}, response.JSON200.Flats, string(response.Body))
 }
 
 func (s *FlatTestSuite) TestUpdateStatus() {
@@ -92,5 +92,5 @@ func (s *FlatTestSuite) TestUpdateStatus() {
 	response, err := api.ParsePostFlatUpdateResponse(resp)
 	require.NoError(s.T(), err)
 
-	require.Equal(s.T(), model.OnModeration, response.JSON200.Status)
+	require.Equal(s.T(), model.OnModeration, response.JSON200.Status, string(response.Body))
 }

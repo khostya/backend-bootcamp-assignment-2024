@@ -24,10 +24,7 @@ jobs:
       - name: Migrate
         run: "sleep 1m && goose -dir ./migrations postgres postgres://postgres:password@localhost:5430/postgres?sslmode=disable up"
 
-      - name: Install dependencies
-        run: "go mod tidy"
-
-      - name: Integration tests
+      - name: Integration postgres tests
         run: "TEST_DATABASE_URL=postgres://postgres:password@localhost:5430/postgres?sslmode=disable \
             go test ./tests/postgres/... -tags=integration"
 
@@ -44,18 +41,21 @@ jobs:
       - name: Set Up Goose
         run: "go install github.com/pressly/goose/v3/cmd/goose@latest"
 
-      - name: Up Server
-        run: "docker compose -f docker-compose-test.yml up -d"
+      - name: Up postgres
+        run: "docker compose up -d postgres"
+
+      - name: Up server
+        run: "docker compose up -d server"
 
       - name: Migrate
-        run: "sleep 1m && goose -dir ./migrations postgres postgres://postgres:password@localhost:5430/postgres?sslmode=disable up"
-
-      - name: Install dependencies
-        run: "go mod tidy"
+        run: "goose -dir ./migrations postgres postgres://postgres:password@localhost:5431/postgres?sslmode=disable up"
 
       - name: Integration tests
-        run: "TEST_HTTP_ENDPOINT=http://localhost:8080 \
-            go test ./tests/http/... -tags=integration"
+        run: "docker compose up \
+              --build \
+              --abort-on-container-exit \
+              --exit-code-from integration-http \
+              integration-http"
 
   unit-test:
     runs-on: ubuntu-latest

@@ -63,7 +63,7 @@ func (s *AuthTestSuite) dummy(userType model.UserType) {
 
 	parsedResp, err := api.ParseGetDummyLoginResponse(resp)
 	require.NoError(s.T(), err)
-	require.Equal(s.T(), http.StatusOK, parsedResp.StatusCode())
+	require.Equal(s.T(), http.StatusOK, parsedResp.StatusCode(), string(parsedResp.Body))
 }
 
 func getUser(ctx context.Context, t *testing.T, token string) userResult {
@@ -75,7 +75,7 @@ func getUser(ctx context.Context, t *testing.T, token string) userResult {
 
 	response, err := api.ParseGetUserResponse(resp)
 	require.NoError(t, err)
-	require.Equal(t, http.StatusOK, response.StatusCode())
+	require.Equal(t, http.StatusOK, response.StatusCode(), string(response.Body))
 
 	return *response.JSON200
 }
@@ -116,11 +116,11 @@ func login(ctx context.Context, t *testing.T, userType model.UserType) (userResu
 
 	response, err := api.ParsePostLoginResponse(resp)
 	require.NoError(t, err)
-	require.Equal(t, http.StatusOK, response.StatusCode())
+	require.Equal(t, http.StatusOK, response.StatusCode(), string(response.Body))
 
 	user := getUser(ctx, t, *response.JSON200.Token)
 	expected := userResult{UserId: registerResult.ID, Email: api.Email(registerResult.Email), UserType: userType}
-	require.Equal(t, expected, user)
+	require.Equal(t, expected, user, string(response.Body))
 
 	return expected, *response.JSON200.Token
 }
@@ -140,7 +140,7 @@ func register(ctx context.Context, t *testing.T, userType model.UserType) regist
 
 	response, err := api.ParsePostRegisterResponse(resp)
 	require.NoError(t, err)
-	require.Equal(t, http.StatusOK, response.StatusCode())
+	require.Equal(t, http.StatusOK, response.StatusCode(), string(response.Body))
 
 	return registerResult{
 		Email:    string(email),
