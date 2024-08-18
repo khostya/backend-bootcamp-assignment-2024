@@ -16,18 +16,27 @@ type (
 		SetModeratorID(ctx context.Context, id uint, moderatorID *uuid.UUID) error
 	}
 
+	sender interface {
+		SendEmail(ctx context.Context, recipient string, message string) error
+		AsyncSendEmails(ctx context.Context, subscriptions []domain.Subscription)
+	}
+
 	Flat struct {
 		transactionManager transactionManager
 		flatRepo           flatRepo
 		houseRepo          houseRepo
+		subscriptionRepo   subscriptionRepo
+		sender             sender
 	}
 )
 
-func NewFlatUseCase(repo flatRepo, houseRepo houseRepo, manager transactionManager) Flat {
+func NewFlatUseCase(repo flatRepo, houseRepo houseRepo, subscriptionRepo subscriptionRepo, manager transactionManager, sender sender) Flat {
 	return Flat{
 		houseRepo:          houseRepo,
 		flatRepo:           repo,
 		transactionManager: manager,
+		subscriptionRepo:   subscriptionRepo,
+		sender:             sender,
 	}
 }
 
@@ -43,8 +52,18 @@ func (uc Flat) Create(ctx context.Context, param dto.CreateFlatParam) (domain.Fl
 		flat.ID = ID
 		return uc.houseRepo.UpdateLastFlatAddedAt(ctx, flat.HouseID, time.Now())
 	})
+	if err != nil {
+		return domain.Flat{}, uc.transactionManager.Unwrap(err)
+	}
 
-	return flat, uc.transactionManager.Unwrap(err)
+	subscriptions, err := uc.subscriptionRepo.GetByHouseID(ctx, param.HouseID)
+	if err != nil {
+		return domain.Flat{}, err
+	}
+
+	uc.sender.AsyncSendEmails(ctx, subscriptions)
+
+	return flat, nil
 }
 
 func (uc Flat) Update(ctx context.Context, param dto.UpdateFlatParam) (domain.Flat, error) {

@@ -6,6 +6,7 @@ import (
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/auth"
 	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/hash"
+	emailsender "github.com/khostya/backend-bootcamp-assignment-2024/pkg/sender"
 	"time"
 )
 
@@ -22,6 +23,8 @@ type (
 		PasswordHasher hash.PasswordHasher
 		TokenManager   auth.TokenManager
 		AccessTokenTTL time.Duration
+
+		Sender *emailsender.Sender
 	}
 
 	UseCases struct {
@@ -38,8 +41,8 @@ func NewUseCases(deps Dependencies) UseCases {
 
 	return UseCases{
 		Deps:  deps,
-		Flat:  NewFlatUseCase(pg.Flat, pg.House, transactor),
-		House: NewHouseUseCase(pg.House, transactor),
+		Flat:  NewFlatUseCase(pg.Flat, pg.House, pg.Subscription, transactor, deps.Sender),
+		House: NewHouseUseCase(pg.House, pg.Subscription, transactor),
 		Auth: NewAuthUseCase(AuthDeps{
 			TransactionManager: deps.Transactor,
 			UserRepo:           deps.Pg.User,

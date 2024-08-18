@@ -15,7 +15,7 @@ type (
 	houseUseCase interface {
 		Create(ctx context.Context, param dto.CreateHouseParam) (domain.House, error)
 		GetByID(ctx context.Context, id uint, userType domain.UserType) (domain.House, error)
-		Subscribe(ctx context.Context, id int, email string) error
+		Subscribe(ctx context.Context, subscription domain.Subscription) error
 	}
 )
 
@@ -88,6 +88,12 @@ func (s *server) GetHouseId(w http.ResponseWriter, r *http.Request, id api.House
 }
 
 func (s *server) PostHouseIdSubscribe(w http.ResponseWriter, r *http.Request, id api.HouseId) {
+	isDummy, ok := r.Context().Value(middleware.KeyUserID).(bool)
+	if !ok || isDummy {
+		s.error(w, r, http.StatusUnauthorized, errUnauthorized)
+		return
+	}
+
 	var req api.PostHouseIdSubscribeJSONBody
 	err := render.DecodeJSON(r.Body, &req)
 	if err != nil {
@@ -95,7 +101,10 @@ func (s *server) PostHouseIdSubscribe(w http.ResponseWriter, r *http.Request, id
 		return
 	}
 
-	err = s.useCases.House.Subscribe(r.Context(), id, string(req.Email))
+	err = s.useCases.House.Subscribe(r.Context(), domain.Subscription{
+		HouseID:   uint(id),
+		UserEmail: string(req.Email),
+	})
 	if err != nil {
 		s.error(w, r, http.StatusInternalServerError, err)
 		return

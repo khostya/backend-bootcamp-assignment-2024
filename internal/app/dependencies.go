@@ -8,6 +8,7 @@ import (
 	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/auth"
 	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/hash"
 	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/postgres"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/sender"
 )
 
 func newDependencies(pool *postgres.Pool, cfg config.Config) usecase.Dependencies {
@@ -20,5 +21,6 @@ func newDependencies(pool *postgres.Pool, cfg config.Config) usecase.Dependencie
 		TokenManager:   auth.NewManager(cfg.Auth.SigningKey),
 		AccessTokenTTL: cfg.Auth.AccessTokenTTL,
 		PasswordHasher: hash.NewPasswordHasher(cfg.Auth.PasswordCostBcrypt),
+		Sender:         sender.New(),
 	}
 }

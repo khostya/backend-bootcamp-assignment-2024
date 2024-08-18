@@ -13,5 +13,5 @@ import (
 type houseService interface {
 	GetByID(ctx context.Context, id uint, userType domain.UserType) (domain.House, error)
 	Create(ctx context.Context, param dto.CreateHouseParam) (domain.House, error)
-	Subscribe(ctx context.Context, id int, email string) error
+	Subscribe(ctx context.Context, subscription domain.Subscription) error
 }

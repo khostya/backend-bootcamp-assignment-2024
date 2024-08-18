@@ -15,16 +15,23 @@ type (
 		GetFullByID(ctx context.Context, id uint, flatStatus *domain.FlatStatus) (domain.House, error)
 	}
 
+	subscriptionRepo interface {
+		Create(ctx context.Context, subscription domain.Subscription) error
+		GetByHouseID(ctx context.Context, houseID uint) ([]domain.Subscription, error)
+	}
+
 	House struct {
 		transactionManager transactionManager
 		houseRepo          houseRepo
+		subscriptionRepo   subscriptionRepo
 	}
 )
 
-func NewHouseUseCase(repo houseRepo, manager transactionManager) House {
+func NewHouseUseCase(repo houseRepo, subscriptionRepo subscriptionRepo, manager transactionManager) House {
 	return House{
 		houseRepo:          repo,
 		transactionManager: manager,
+		subscriptionRepo:   subscriptionRepo,
 	}
 }
 
@@ -46,6 +53,6 @@ func (uc House) Create(ctx context.Context, param dto.CreateHouseParam) (domain.
 	return house, err
 }
 
-func (uc House) Subscribe(ctx context.Context, id int, email string) error {
-	panic("11")
+func (uc House) Subscribe(ctx context.Context, subscription domain.Subscription) error {
+	return uc.subscriptionRepo.Create(ctx, subscription)
 }

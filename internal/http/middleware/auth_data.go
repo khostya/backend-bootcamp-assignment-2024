@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	KeyUserID   = "userID"
+	KeyUserID   = "user id"
+	KeyIsDummy  = "is dummy"
 	KeyUserType = "user type"
 )
 
@@ -31,6 +32,13 @@ func AuthData(manager auth.TokenManager) func(http.Handler) http.Handler {
 				return
 			}
 			r = r.WithContext(context.WithValue(r.Context(), KeyUserType, domain.UserType(userType)))
+
+			isDummy, err := manager.ExtractIsDummy(tokenHeader)
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			r = r.WithContext(context.WithValue(r.Context(), KeyIsDummy, isDummy))
 
 			next.ServeHTTP(w, r)
 			return

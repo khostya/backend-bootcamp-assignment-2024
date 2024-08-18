@@ -5,15 +5,17 @@ import (
 )
 
 type Repositories struct {
-	Flat  Flat
-	House House
-	User  User
+	Flat         Flat
+	House        House
+	User         User
+	Subscription Subscription
 }
 
 func NewRepositories(provider transactor.QueryEngineProvider) Repositories {
 	return Repositories{
-		Flat:  NewFlatRepo(provider),
-		User:  NewUserRepo(provider),
-		House: NewHouseRepo(provider),
+		Flat:         NewFlatRepo(provider),
+		User:         NewUserRepo(provider),
+		House:        NewHouseRepo(provider),
+		Subscription: NewSubscriptionRepo(provider),
 	}
 }

@@ -11,16 +11,18 @@ import (
 )
 
 type houseMocks struct {
-	mockHouseRepo  *mock_repo.MockhouseRepo
-	mockTransactor *mock_transactor.MockTransactor
+	mockHouseRepo    *mock_repo.MockhouseRepo
+	mockTransactor   *mock_transactor.MockTransactor
+	mockSubscription *mock_repo.MocksubscriptionRepo
 }
 
 func newHouseMocks(t *testing.T) houseMocks {
 	ctrl := gomock.NewController(t)
 
 	return houseMocks{
-		mockTransactor: mock_transactor.NewMockTransactor(ctrl),
-		mockHouseRepo:  mock_repo.NewMockhouseRepo(ctrl),
+		mockTransactor:   mock_transactor.NewMockTransactor(ctrl),
+		mockHouseRepo:    mock_repo.NewMockhouseRepo(ctrl),
+		mockSubscription: mock_repo.NewMocksubscriptionRepo(ctrl),
 	}
 }
 
@@ -56,7 +58,7 @@ func TestHouseUseCase_Create(t *testing.T) {
 			mocks := newHouseMocks(t)
 			tt.mockFn(ctx, mocks)
 
-			houseUseCase := NewHouseUseCase(mocks.mockHouseRepo, mocks.mockTransactor)
+			houseUseCase := NewHouseUseCase(mocks.mockHouseRepo, mocks.mockSubscription, mocks.mockTransactor)
 
 			_, err := houseUseCase.Create(ctx, tt.input)
 			require.NoError(t, err)

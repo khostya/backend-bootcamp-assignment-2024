@@ -48,7 +48,7 @@ func NewAuthUseCase(deps AuthDeps) Auth {
 }
 
 func (uc Auth) DummyLogin(_ context.Context, userType domain.UserType) (domain.Token, error) {
-	return uc.createToken(uuid.New(), userType)
+	return uc.createToken(uuid.New(), userType, true)
 }
 
 func (uc Auth) Login(ctx context.Context, param dto.LoginUserParam) (domain.Token, error) {
@@ -61,7 +61,7 @@ func (uc Auth) Login(ctx context.Context, param dto.LoginUserParam) (domain.Toke
 		return "", ErrIncorrectPassword
 	}
 
-	return uc.createToken(user.ID, user.UserType)
+	return uc.createToken(user.ID, user.UserType, false)
 }
 
 func (uc Auth) Register(ctx context.Context, param dto.RegisterUserParam) (uuid.UUID, error) {
@@ -77,7 +77,7 @@ func (uc Auth) Register(ctx context.Context, param dto.RegisterUserParam) (uuid.
 	return user.ID, err
 }
 
-func (uc Auth) createToken(ID uuid.UUID, userType domain.UserType) (domain.Token, error) {
-	token, err := uc.tokenManager.NewUserJWT(ID, string(userType), time.Now().Add(uc.accessTokenTTL))
+func (uc Auth) createToken(ID uuid.UUID, userType domain.UserType, isDummy bool) (domain.Token, error) {
+	token, err := uc.tokenManager.NewUserJWT(ID, string(userType), time.Now().Add(uc.accessTokenTTL), isDummy)
 	return domain.Token(token), err
 }
