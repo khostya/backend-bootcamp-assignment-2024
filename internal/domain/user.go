@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"backend-bootcamp-assignment-2024/internal/dto"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
 )
 
 type UserType string
@@ -30,4 +30,8 @@ func NewUser(param dto.RegisterUserParam, hashedPassword string) User {
 		UserType: UserType(param.UserType),
 		Password: hashedPassword,
 	}
+}
+
+func GetALLUserTypes() []UserType {
+	return []UserType{UserClient, UserModerator}
 }

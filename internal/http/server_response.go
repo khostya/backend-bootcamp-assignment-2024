@@ -1,10 +1,10 @@
 package http
 
 import (
-	"backend-bootcamp-assignment-2024/internal/http/api"
-	"backend-bootcamp-assignment-2024/internal/repo/repoerr"
 	"errors"
 	"github.com/go-chi/render"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/api"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/repoerr"
 	"net/http"
 )
 

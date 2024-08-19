@@ -1,13 +1,13 @@
 package main
 
 import (
-	"backend-bootcamp-assignment-2024/internal/config"
-	"backend-bootcamp-assignment-2024/internal/http/openapi"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/config"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/openapi"
 	"github.com/swaggo/swag"
 	"strings"
 )

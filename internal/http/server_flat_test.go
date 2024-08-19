@@ -1,12 +1,13 @@
 package http
 
 import (
-	"backend-bootcamp-assignment-2024/internal/cache"
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/http/api"
-	"backend-bootcamp-assignment-2024/internal/http/middleware"
 	"context"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/cache"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/api"
+	model "github.com/khostya/backend-bootcamp-assignment-2024/internal/http/api/models"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/middleware"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"net/http"
@@ -108,7 +109,7 @@ func TestServerFlat_postUpdate(t *testing.T) {
 			name: "ok",
 			input: api.PostFlatUpdateJSONBody{
 				Id:     1,
-				Status: api.Created,
+				Status: model.Created,
 			},
 			wandErr: false,
 			status:  http.StatusOK,
@@ -129,7 +130,7 @@ func TestServerFlat_postUpdate(t *testing.T) {
 		{
 			name: "bad request without id",
 			input: api.PostFlatUpdateJSONBody{
-				Status: api.Created,
+				Status: model.Created,
 			},
 			wandErr: true,
 			status:  http.StatusBadRequest,
@@ -150,8 +151,8 @@ func TestServerFlat_postUpdate(t *testing.T) {
 			server, err := newServer(mocks.useCases, Cache{House: cache.NewHouseCache(0, 0)})
 			require.NoError(t, err)
 
-			ctx := context.WithValue(ctx, middleware.UserID, uuid.New())
-			ctx = context.WithValue(ctx, middleware.UserType, domain.UserModerator)
+			ctx := context.WithValue(ctx, middleware.KeyUserID, uuid.New())
+			ctx = context.WithValue(ctx, middleware.KeyUserType, domain.UserModerator)
 
 			status, _, err := server.postFlatUpdate(ctx, tt.input)
 			require.Equal(t, tt.wandErr, err != nil)

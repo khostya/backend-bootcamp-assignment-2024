@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/dto"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
 	"time"
 )
 
@@ -12,23 +12,36 @@ type (
 		GetByID(ctx context.Context, id uint) (domain.House, error)
 		Create(ctx context.Context, house domain.House) (uint, error)
 		UpdateLastFlatAddedAt(ctx context.Context, id uint, updatedAt time.Time) error
+		GetFullByID(ctx context.Context, id uint, flatStatus *domain.FlatStatus) (domain.House, error)
+	}
+
+	subscriptionRepo interface {
+		Create(ctx context.Context, subscription domain.Subscription) error
+		GetByHouseID(ctx context.Context, houseID uint) ([]domain.Subscription, error)
 	}
 
 	House struct {
 		transactionManager transactionManager
 		houseRepo          houseRepo
+		subscriptionRepo   subscriptionRepo
 	}
 )
 
-func NewHouseUseCase(repo houseRepo, manager transactionManager) House {
+func NewHouseUseCase(repo houseRepo, subscriptionRepo subscriptionRepo, manager transactionManager) House {
 	return House{
 		houseRepo:          repo,
 		transactionManager: manager,
+		subscriptionRepo:   subscriptionRepo,
 	}
 }
 
-func (uc House) GetByID(ctx context.Context, id uint) (domain.House, error) {
-	return uc.houseRepo.GetByID(ctx, id)
+func (uc House) GetByID(ctx context.Context, id uint, userType domain.UserType) (domain.House, error) {
+	if userType == domain.UserClient {
+		status := domain.FlatApproved
+		return uc.houseRepo.GetFullByID(ctx, id, &status)
+	}
+
+	return uc.houseRepo.GetFullByID(ctx, id, nil)
 }
 
 func (uc House) Create(ctx context.Context, param dto.CreateHouseParam) (domain.House, error) {
@@ -40,6 +53,6 @@ func (uc House) Create(ctx context.Context, param dto.CreateHouseParam) (domain.
 	return house, err
 }
 
-func (uc House) Subscribe(ctx context.Context, id int, email string) error {
-	panic("11")
+func (uc House) Subscribe(ctx context.Context, subscription domain.Subscription) error {
+	return uc.subscriptionRepo.Create(ctx, subscription)
 }

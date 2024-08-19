@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 create table if not exists bootcamp.flats
 (
-    id           int primary key      not null,
+    id           serial primary key   not null,
     house_id     int                  not null references bootcamp.houses (id),
     price        int                  not null,
     rooms        int                  not null,

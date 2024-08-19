@@ -1,10 +1,10 @@
 package http
 
 import (
-	"backend-bootcamp-assignment-2024/internal/cache"
-	"backend-bootcamp-assignment-2024/internal/http/api"
-	"backend-bootcamp-assignment-2024/pkg/validator"
 	"errors"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/cache"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/api"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/validator"
 )
 
 var _ api.ServerInterface = (*server)(nil)
@@ -16,6 +16,7 @@ type (
 		Flat  flatUseCase
 		House houseUseCase
 		Auth  authUseCase
+		User  userUseCase
 	}
 
 	Cache struct {

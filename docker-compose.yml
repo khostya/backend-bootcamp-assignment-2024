@@ -3,12 +3,17 @@ version: "3.9"
 services:
   server:
     container_name: server
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/postgres?sslmode=disable
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     depends_on:
+      - postgres
+    networks:
+      - backend
       - postgres
 
   postgres:
@@ -22,7 +27,7 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5431:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 10s
@@ -35,12 +40,28 @@ services:
         limits:
           cpus: '1'
           memory: 4G
+    networks:
+      - postgres
 
-  integration-postgres:
+  integration-http:
     build:
       context: .
-      dockerfile: tests/postgres/Dockerfile
-    container_name: integration-postgres
-    image: integration-postgres
+      dockerfile: ./tests/http/Dockerfile
+    environment:
+      TEST_HTTP_ENDPOINT: http://server:8080
+    container_name: integration
+    image: integration-http
     depends_on:
       - server
+    networks:
+      - backend
+
+volumes:
+  postgres:
+    name: postgres
+
+networks:
+  postgres:
+    name: postgres
+  backend:
+    name: backend

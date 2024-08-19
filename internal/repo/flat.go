@@ -1,14 +1,14 @@
 package repo
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/repo/exec"
-	"backend-bootcamp-assignment-2024/internal/repo/schema"
-	"backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"context"
 	"database/sql"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/exec"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/schema"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 )
 
 const (
@@ -26,31 +26,18 @@ func (f Flat) Create(ctx context.Context, flat domain.Flat) (uint, error) {
 
 	record := schema.NewFlat(flat)
 	query := sq.Insert(flatTable).
-		Columns(record.Columns()...).
-		Values(record.Values()...).
+		Columns(record.InsertColumns()...).
+		Values(record.InsertValues()...).
 		PlaceholderFormat(sq.Dollar).
 		Suffix(`RETURNING "id"`)
 
-	rawQuery, args, err := query.ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	row, err := db.Query(ctx, rawQuery, args...)
-	if err != nil {
-		return 0, err
-	}
-	defer row.Close()
-
-	var id uint
-	err = row.Scan(&id)
-	return id, err
+	return exec.InsertWithReturningID(ctx, query, db)
 }
 
 func (f Flat) GetByID(ctx context.Context, id uint) (domain.Flat, error) {
 	db := f.queryEngineProvider.GetQueryEngine(ctx)
 
-	query := sq.Select(schema.Flat{}.Columns()...).
+	query := sq.Select(schema.Flat{}.SelectColumns()...).
 		From(flatTable).
 		Where("id = $1", id).
 		PlaceholderFormat(sq.Dollar)
@@ -68,7 +55,7 @@ func (f Flat) UpdateStatus(ctx context.Context, id uint, status domain.FlatStatu
 
 	query := sq.Update(flatTable).
 		Set("status", status).
-		Where("id = $1", id).
+		Where("id = $2", id).
 		PlaceholderFormat(sq.Dollar)
 
 	return exec.Update(ctx, query, db)
@@ -85,7 +72,7 @@ func (f Flat) SetModeratorID(ctx context.Context, id uint, moderatorID *uuid.UUI
 	sqlModeratorID := sql.Null[uuid.UUID]{V: nullableModeratorID, Valid: nullableModeratorID.String() != uuid.UUID{}.String()}
 	query := sq.Update(flatTable).
 		Set("moderator_id", sqlModeratorID).
-		Where("id = $1", id).
+		Where("id = $2", id).
 		PlaceholderFormat(sq.Dollar)
 
 	return exec.Update(ctx, query, db)

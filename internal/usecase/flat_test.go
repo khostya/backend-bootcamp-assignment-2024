@@ -1,29 +1,34 @@
 package usecase
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/dto"
-	mock_repo "backend-bootcamp-assignment-2024/internal/repo/mocks"
-	mock_transactor "backend-bootcamp-assignment-2024/internal/repo/transactor/mocks"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
+	mock_repo "github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/mocks"
+	mock_transactor "github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor/mocks"
+	mock_usecase "github.com/khostya/backend-bootcamp-assignment-2024/internal/usecase/mocks"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"testing"
 )
 
 type flatMocks struct {
-	mockFlatRepo   *mock_repo.MockflatRepo
-	mockHouseRepo  *mock_repo.MockhouseRepo
-	mockTransactor *mock_transactor.MockTransactor
+	mockFlatRepo         *mock_repo.MockflatRepo
+	mockHouseRepo        *mock_repo.MockhouseRepo
+	mockSubscriptionRepo *mock_repo.MocksubscriptionRepo
+	mockSender           *mock_usecase.MocksenderService
+	mockTransactor       *mock_transactor.MockTransactor
 }
 
 func newFlatMocks(t *testing.T) flatMocks {
 	ctrl := gomock.NewController(t)
 
 	return flatMocks{
-		mockHouseRepo:  mock_repo.NewMockhouseRepo(ctrl),
-		mockTransactor: mock_transactor.NewMockTransactor(ctrl),
-		mockFlatRepo:   mock_repo.NewMockflatRepo(ctrl),
+		mockHouseRepo:        mock_repo.NewMockhouseRepo(ctrl),
+		mockTransactor:       mock_transactor.NewMockTransactor(ctrl),
+		mockFlatRepo:         mock_repo.NewMockflatRepo(ctrl),
+		mockSubscriptionRepo: mock_repo.NewMocksubscriptionRepo(ctrl),
+		mockSender:           mock_usecase.NewMocksenderService(ctrl),
 	}
 }
 
@@ -55,7 +60,8 @@ func TestFlatUseCase_Create(t *testing.T) {
 					DoAndReturn(func(ctx context.Context, transaction func(ctx context.Context) error) error {
 						return transaction(ctx)
 					})
-				m.mockTransactor.EXPECT().Unwrap(gomock.Any()).Times(1).Return(nil)
+				m.mockSubscriptionRepo.EXPECT().GetByHouseID(gomock.Any(), gomock.Any()).Times(1).Return(nil, nil)
+				m.mockSender.EXPECT().AsyncSendEmails(gomock.Any(), gomock.Any()).Times(1)
 			},
 		},
 	}
@@ -68,7 +74,8 @@ func TestFlatUseCase_Create(t *testing.T) {
 			mocks := newFlatMocks(t)
 			tt.mockFn(ctx, mocks)
 
-			flatUseCase := NewFlatUseCase(mocks.mockFlatRepo, mocks.mockHouseRepo, mocks.mockTransactor)
+			flatUseCase := NewFlatUseCase(mocks.mockFlatRepo, mocks.mockHouseRepo,
+				mocks.mockSubscriptionRepo, mocks.mockTransactor, mocks.mockSender)
 
 			_, err := flatUseCase.Create(ctx, tt.input)
 			require.NoError(t, err)
@@ -115,7 +122,8 @@ func TestFlatUseCase_Update(t *testing.T) {
 			mocks := newFlatMocks(t)
 			tt.mockFn(ctx, tt.input, mocks)
 
-			flatUseCase := NewFlatUseCase(mocks.mockFlatRepo, mocks.mockHouseRepo, mocks.mockTransactor)
+			flatUseCase := NewFlatUseCase(mocks.mockFlatRepo, mocks.mockHouseRepo,
+				mocks.mockSubscriptionRepo, mocks.mockTransactor, mocks.mockSender)
 
 			_, err := flatUseCase.Update(ctx, tt.input)
 			require.ErrorIs(t, err, tt.err)

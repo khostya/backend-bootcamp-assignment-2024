@@ -1,12 +1,12 @@
 package repo
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/repo/exec"
-	"backend-bootcamp-assignment-2024/internal/repo/schema"
-	"backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"context"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/exec"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/schema"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"time"
 )
 
@@ -41,7 +41,7 @@ func (h House) Create(ctx context.Context, house domain.House) (uint, error) {
 func (h House) GetByID(ctx context.Context, id uint) (domain.House, error) {
 	db := h.queryEngineProvider.GetQueryEngine(ctx)
 
-	query := sq.Select(schema.Flat{}.Columns()...).
+	query := sq.Select(schema.House{}.SelectColumns()...).
 		From(houseTable).
 		Where("id = $1", id).
 		PlaceholderFormat(sq.Dollar)
@@ -54,12 +54,34 @@ func (h House) GetByID(ctx context.Context, id uint) (domain.House, error) {
 	return schema.NewDomainHouse(house), nil
 }
 
+func (h House) GetFullByID(ctx context.Context, id uint, flatStatus *domain.FlatStatus) (domain.House, error) {
+	db := h.queryEngineProvider.GetQueryEngine(ctx)
+
+	columns := append(schema.House{}.SelectColumns(), schema.Flat{}.SelectColumns()...)
+	query := sq.Select(columns...).
+		From(houseTable).
+		Where("houses.id = $1", id).
+		RightJoin("bootcamp.flats on flats.house_id = houses.id").
+		PlaceholderFormat(sq.Dollar)
+
+	if flatStatus != nil {
+		query = query.Where("flat_status = $2", *flatStatus)
+	}
+
+	house, err := exec.ScanALL[schema.FlatHouse](ctx, query, db)
+	if err != nil {
+		return domain.House{}, err
+	}
+
+	return schema.NewDomainHouseWithFlats(house), nil
+}
+
 func (h House) UpdateLastFlatAddedAt(ctx context.Context, id uint, lastFlatAddedAt time.Time) error {
 	db := h.queryEngineProvider.GetQueryEngine(ctx)
 
 	query := sq.Update(houseTable).
 		Set("last_flat_added_at", lastFlatAddedAt).
-		Where("id = $1", id).
+		Where("id = $2", id).
 		PlaceholderFormat(sq.Dollar)
 
 	return exec.Update(ctx, query, db)

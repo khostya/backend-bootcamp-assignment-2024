@@ -1,12 +1,13 @@
 package http
 
 import (
-	"backend-bootcamp-assignment-2024/internal/cache"
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/http/api"
-	mock_usecase "backend-bootcamp-assignment-2024/internal/usecase/mocks"
 	"context"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/cache"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/api"
+	model "github.com/khostya/backend-bootcamp-assignment-2024/internal/http/api/models"
+	mock_usecase "github.com/khostya/backend-bootcamp-assignment-2024/internal/usecase/mocks"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"net/http"
@@ -31,7 +32,9 @@ func newMocks(t *testing.T) mocks {
 		House: house,
 		Auth:  auth,
 		useCases: UseCases{
-			flat, house, auth,
+			Flat:  flat,
+			House: house,
+			Auth:  auth,
 		},
 	}
 }
@@ -87,7 +90,7 @@ func TestServerAuth_Login(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			
+
 			mocks := newMocks(t)
 			tt.mockFn(mocks)
 
@@ -119,7 +122,7 @@ func TestServerAuth_Register(t *testing.T) {
 			input: api.PostRegisterJSONBody{
 				Email:    nil,
 				Password: uuid.NewString(),
-				UserType: api.Client,
+				UserType: model.Client,
 			},
 			wantErr: false,
 			status:  http.StatusOK,
@@ -132,7 +135,7 @@ func TestServerAuth_Register(t *testing.T) {
 			input: api.PostRegisterJSONBody{
 				Email:    &email,
 				Password: uuid.NewString(),
-				UserType: api.Client,
+				UserType: model.Client,
 			},
 			wantErr: false,
 			status:  http.StatusOK,
@@ -143,7 +146,7 @@ func TestServerAuth_Register(t *testing.T) {
 		{
 			name: "bad request_password required",
 			input: api.PostRegisterJSONBody{
-				UserType: api.Client,
+				UserType: model.Client,
 			},
 			wantErr: true,
 			status:  http.StatusBadRequest,

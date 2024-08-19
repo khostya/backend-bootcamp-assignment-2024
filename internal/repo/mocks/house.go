@@ -3,14 +3,16 @@
 package mock_repo
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
 	"context"
 	"time"
+
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 )
 
 // houseRepo ...
 type houseRepo interface {
 	Create(ctx context.Context, house domain.House) (uint, error)
 	GetByID(ctx context.Context, id uint) (domain.House, error)
+	GetFullByID(ctx context.Context, id uint, flatStatus *domain.FlatStatus) (domain.House, error)
 	UpdateLastFlatAddedAt(ctx context.Context, id uint, lastFlatAddedAt time.Time) error
 }

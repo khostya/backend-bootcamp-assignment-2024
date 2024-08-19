@@ -14,17 +14,19 @@ type TokenManager struct {
 
 const (
 	userTypeKey = "user type"
+	isDummyKey  = "is dummy"
 )
 
 func NewManager(signingKey string) TokenManager {
 	return TokenManager{signingKey: signingKey}
 }
 
-func (m TokenManager) NewUserJWT(id uuid.UUID, userType string, expiresAt time.Time) (string, error) {
+func (m TokenManager) NewUserJWT(id uuid.UUID, userType string, expiresAt time.Time, isDummy bool) (string, error) {
 	return m.newCustomJWT(jwt.MapClaims{
 		"exp":       jwt.NewNumericDate(expiresAt),
 		"sub":       id.String(),
 		userTypeKey: userType,
+		isDummyKey:  isDummy,
 	})
 }
 
@@ -104,6 +106,14 @@ func (m TokenManager) ExtractUserType(tokenHeader []string) (string, error) {
 		return "", err
 	}
 	return claim.(string), nil
+}
+
+func (m TokenManager) ExtractIsDummy(tokenHeader []string) (bool, error) {
+	claim, err := m.extractClaim(tokenHeader, isDummyKey)
+	if err != nil {
+		return false, err
+	}
+	return claim.(bool), nil
 }
 
 func (m TokenManager) getToken(tokenHeader []string) (string, error) {

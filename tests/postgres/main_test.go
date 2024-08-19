@@ -3,8 +3,8 @@
 package postgres
 
 import (
-	"backend-bootcamp-assignment-2024/tests/postgres/postgresql"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/tests/postgres/postgresql"
 	"os"
 	"testing"
 )
@@ -14,9 +14,10 @@ var (
 )
 
 const (
-	usersTable  = "bootcamp.users"
-	flatsTable  = "bootcamp.users"
-	housesTable = "bootcamp.houses"
+	usersTable         = "bootcamp.users"
+	flatsTable         = "bootcamp.flats"
+	housesTable        = "bootcamp.houses"
+	subscriptionsTable = "bootcamp.subscriptions"
 )
 
 func TestMain(m *testing.M) {
@@ -24,7 +25,7 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 
-	db.TruncateTable(context.Background(), flatsTable, housesTable, usersTable)
+	db.TruncateTable(context.Background(), subscriptionsTable, flatsTable, housesTable, usersTable)
 	db.Close()
 
 	os.Exit(code)

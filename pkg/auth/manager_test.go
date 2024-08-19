@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
@@ -47,7 +47,7 @@ func TestManager(t *testing.T) {
 			t.Parallel()
 
 			user := tt.user
-			token, err := tt.manager.NewUserJWT(user.ID, string(user.UserType), time.Now().Add(tt.ttl))
+			token, err := tt.manager.NewUserJWT(user.ID, string(user.UserType), time.Now().Add(tt.ttl), false)
 			require.NoError(t, err)
 
 			userType, err := tt.manager.ExtractUserType([]string{"Bearer", token})

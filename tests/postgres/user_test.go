@@ -3,9 +3,9 @@
 package postgres
 
 import (
-	"backend-bootcamp-assignment-2024/internal/repo"
-	"backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"context"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"testing"
@@ -27,6 +27,10 @@ func (s *UsersTestSuite) SetupSuite() {
 	s.transactor = transactor.NewTransactionManager(db.GetPool())
 	s.userRepo = repo.NewUserRepo(s.transactor)
 	s.ctx = context.Background()
+}
+
+func (s *UsersTestSuite) SetupTest() {
+	s.T().Parallel()
 }
 
 func (s *UsersTestSuite) TestCreate() {

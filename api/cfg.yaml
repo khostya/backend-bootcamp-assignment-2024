@@ -2,6 +2,9 @@
 package: api
 output: ./../internal/http/api/server.gen.go
 generate:
-  models: true
-  embedded-spec: true
   std-http-server: true
+  client: true
+  models: true
+
+import-mapping:
+  ./components.yaml: github.com/khostya/backend-bootcamp-assignment-2024/internal/http/api/models

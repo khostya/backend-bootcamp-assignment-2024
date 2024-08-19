@@ -1,3 +1,5 @@
+![build](https://github.com/khostya/backend-bootcamp-assignment-2024/actions/workflows/build.yml/badge.svg?event=push)
+
 # Тестовое задание для отбора на Avito Backend Bootcamp
 ## Сервис домов
 
