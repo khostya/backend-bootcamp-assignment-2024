@@ -12,7 +12,7 @@ type House struct {
 	Year      uint   `json:"year"`
 	Developer string `json:"developer"`
 
-	Flats []Flat `json:"_"`
+	Flats []Flat `json:"-"`
 
 	CreatedAt       time.Time `json:"created_at"`
 	LastFlatAddedAt time.Time `json:"update_at"`

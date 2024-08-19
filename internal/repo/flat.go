@@ -6,7 +6,9 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/exec"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/repoerr"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/schema"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 )
@@ -21,7 +23,7 @@ type (
 	}
 )
 
-func (f Flat) Create(ctx context.Context, flat domain.Flat) (uint, error) {
+func (f Flat) Create(ctx context.Context, flat domain.Flat) (dto.FlatCreateResult, error) {
 	db := f.queryEngineProvider.GetQueryEngine(ctx)
 
 	record := schema.NewFlat(flat)
@@ -29,9 +31,20 @@ func (f Flat) Create(ctx context.Context, flat domain.Flat) (uint, error) {
 		Columns(record.InsertColumns()...).
 		Values(record.InsertValues()...).
 		PlaceholderFormat(sq.Dollar).
-		Suffix(`RETURNING "id"`)
+		Suffix(`RETURNING "id", "number"`)
 
-	return exec.InsertWithReturningID(ctx, query, db)
+	row, err := exec.InsertWithRow(ctx, query, db)
+	if err != nil {
+		return dto.FlatCreateResult{}, err
+	}
+
+	var id, number uint
+	err = row.Scan(&id, &number)
+	if err != nil && exec.IsDuplicateKeyError(err) {
+		return dto.FlatCreateResult{}, repoerr.ErrDuplicate
+	}
+
+	return dto.FlatCreateResult{ID: id, Number: number}, nil
 }
 
 func (f Flat) GetByID(ctx context.Context, id uint) (domain.Flat, error) {

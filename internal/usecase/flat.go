@@ -10,7 +10,7 @@ import (
 
 type (
 	flatRepo interface {
-		Create(ctx context.Context, flat domain.Flat) (uint, error)
+		Create(ctx context.Context, flat domain.Flat) (dto.FlatCreateResult, error)
 		UpdateStatus(ctx context.Context, id uint, status domain.FlatStatus) error
 		GetByID(ctx context.Context, id uint) (domain.Flat, error)
 		SetModeratorID(ctx context.Context, id uint, moderatorID *uuid.UUID) error
@@ -44,12 +44,13 @@ func (uc Flat) Create(ctx context.Context, param dto.CreateFlatParam) (domain.Fl
 	flat := domain.NewFlat(param)
 
 	err := uc.transactionManager.RunRepeatableRead(ctx, func(ctx context.Context) error {
-		ID, err := uc.flatRepo.Create(ctx, flat)
+		result, err := uc.flatRepo.Create(ctx, flat)
 		if err != nil {
 			return err
 		}
 
-		flat.ID = ID
+		flat.ID = result.ID
+		flat.Number = result.Number
 		return uc.houseRepo.UpdateLastFlatAddedAt(ctx, flat.HouseID, time.Now())
 	})
 	if err != nil {

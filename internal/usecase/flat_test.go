@@ -53,7 +53,7 @@ func TestFlatUseCase_Create(t *testing.T) {
 
 			mockFn: func(ctx context.Context, m flatMocks) {
 				m.mockFlatRepo.EXPECT().Create(gomock.Any(), gomock.Any()).
-					Times(1).Return(uint(1), nil)
+					Times(1).Return(dto.FlatCreateResult{}, nil)
 				m.mockHouseRepo.EXPECT().UpdateLastFlatAddedAt(gomock.Any(), gomock.Any(), gomock.Any()).
 					Times(1).Return(nil)
 				m.mockTransactor.EXPECT().RunRepeatableRead(gomock.Any(), gomock.Any()).Times(1).Return(nil).

@@ -21,7 +21,8 @@ type (
 		Price       uint       `json:"price"`
 		Rooms       uint       `json:"rooms"`
 		Status      FlatStatus `json:"status"`
-		ModeratorID uuid.UUID  `json:"_"`
+		Number      uint       `json:"-"`
+		ModeratorID uuid.UUID  `json:"-"`
 	}
 )
 
