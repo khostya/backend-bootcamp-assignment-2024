@@ -82,9 +82,10 @@ func (s *FlatsTestSuite) createFlat() domain.Flat {
 	houses.ID = houseID
 	flat := NewFlats(houseID)
 
-	flatID, err := s.flatRepo.Create(s.ctx, flat)
+	res, err := s.flatRepo.Create(s.ctx, flat)
 	require.NoError(s.T(), err)
 
-	flat.ID = flatID
+	flat.ID = res.ID
+	flat.Number = res.Number
 	return flat
 }

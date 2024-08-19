@@ -16,10 +16,10 @@ type (
 	Token string
 
 	User struct {
-		ID       uuid.UUID
-		Email    string
-		UserType UserType
-		Password string
+		ID       uuid.UUID `json:"id"`
+		Email    string    `json:"email"`
+		UserType UserType  `json:"user_type"`
+		Password string    `json:"password"`
 	}
 )
 

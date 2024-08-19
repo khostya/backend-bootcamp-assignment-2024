@@ -31,11 +31,12 @@ func (s *server) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) getUser(ctx context.Context) (int, domain.User, error) {
-	userID, ok := ctx.Value(middleware.KeyUserID).(uuid.UUID)
-	if !ok {
+	isDummy, ok := ctx.Value(middleware.KeyIsDummy).(bool)
+	if !ok || isDummy {
 		return http.StatusUnauthorized, domain.User{}, errUnauthorized
 	}
 
+	userID := ctx.Value(middleware.KeyUserID).(uuid.UUID)
 	user, err := s.useCases.User.GetByID(ctx, userID)
 	if err != nil {
 		return http.StatusInternalServerError, domain.User{}, err

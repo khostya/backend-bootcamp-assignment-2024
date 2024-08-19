@@ -63,10 +63,11 @@ func (s *HousesTestSuite) TestGetFullByID() {
 	house.ID = id
 
 	flat := NewFlats(house.ID)
-	idCreatedFlat, err := s.flatRepo.Create(s.ctx, flat)
+	result, err := s.flatRepo.Create(s.ctx, flat)
 	require.NoError(s.T(), err)
 
-	flat.ID = idCreatedFlat
+	flat.ID = result.ID
+	flat.Number = result.Number
 	house.Flats = append(house.Flats, flat)
 
 	actual, err := s.houseRepo.GetFullByID(s.ctx, id, nil)

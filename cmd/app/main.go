@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/app"
 	"github.com/khostya/backend-bootcamp-assignment-2024/internal/config"
 	"log"
+	"net/http"
 	"os/signal"
 	"syscall"
 )
@@ -18,7 +20,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	if err := app.Run(ctx, cfg); err != nil {
+	if err := app.Run(ctx, cfg); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalln(err)
 	}
 }
