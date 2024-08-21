@@ -1,4 +1,4 @@
-DEFAULT_PG_URL=postgres://postgres:password@localhost:5431/postgres?sslmode=disable
+DEFAULT_PG_URL=postgres://postgres:password@localhost:5432/postgres?sslmode=disable
 
 .PHONY: .build-goose
 build-goose:
