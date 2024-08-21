@@ -10,11 +10,12 @@
 package mock_repo
 
 import (
-	domain "backend-bootcamp-assignment-2024/internal/domain"
 	context "context"
 	reflect "reflect"
 
 	uuid "github.com/google/uuid"
+	domain "github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	dto "github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -42,10 +43,10 @@ func (m *MockflatRepo) EXPECT() *MockflatRepoMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockflatRepo) Create(ctx context.Context, flat domain.Flat) (uint, error) {
+func (m *MockflatRepo) Create(ctx context.Context, flat domain.Flat) (dto.FlatCreateResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, flat)
-	ret0, _ := ret[0].(uint)
+	ret0, _ := ret[0].(dto.FlatCreateResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

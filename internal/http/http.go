@@ -1,15 +1,15 @@
 package http
 
 import (
-	"backend-bootcamp-assignment-2024/internal/config"
-	"backend-bootcamp-assignment-2024/internal/http/api"
-	"backend-bootcamp-assignment-2024/internal/http/middleware"
-	"backend-bootcamp-assignment-2024/internal/http/openapi"
-	"backend-bootcamp-assignment-2024/pkg/auth"
-	"backend-bootcamp-assignment-2024/pkg/httpserver"
 	"context"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/go-chi/cors"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/config"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/api"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/middleware"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/http/openapi"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/auth"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/httpserver"
 	"github.com/oapi-codegen/nethttp-middleware"
 	"log"
 )

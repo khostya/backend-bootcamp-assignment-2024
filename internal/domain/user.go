@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"backend-bootcamp-assignment-2024/internal/dto"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
 )
 
 type UserType string
@@ -16,10 +16,10 @@ type (
 	Token string
 
 	User struct {
-		ID       uuid.UUID
-		Email    string
-		UserType UserType
-		Password string
+		ID       uuid.UUID `json:"id"`
+		Email    string    `json:"email"`
+		UserType UserType  `json:"user_type"`
+		Password string    `json:"password"`
 	}
 )
 
@@ -30,4 +30,8 @@ func NewUser(param dto.RegisterUserParam, hashedPassword string) User {
 		UserType: UserType(param.UserType),
 		Password: hashedPassword,
 	}
+}
+
+func GetALLUserTypes() []UserType {
+	return []UserType{UserClient, UserModerator}
 }

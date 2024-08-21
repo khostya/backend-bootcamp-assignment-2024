@@ -10,12 +10,12 @@
 package mock_transactor
 
 import (
-	transactor "backend-bootcamp-assignment-2024/internal/repo/transactor"
 	context "context"
 	reflect "reflect"
 
 	pgx "github.com/jackc/pgx/v5"
 	pgconn "github.com/jackc/pgx/v5/pgconn"
+	transactor "github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 	gomock "go.uber.org/mock/gomock"
 )
 

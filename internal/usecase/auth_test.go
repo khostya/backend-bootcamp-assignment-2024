@@ -1,14 +1,14 @@
 package usecase
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/dto"
-	mock_repo "backend-bootcamp-assignment-2024/internal/repo/mocks"
-	mock_transactor "backend-bootcamp-assignment-2024/internal/repo/transactor/mocks"
-	"backend-bootcamp-assignment-2024/pkg/auth"
-	"backend-bootcamp-assignment-2024/pkg/hash"
 	"context"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
+	mock_repo "github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/mocks"
+	mock_transactor "github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor/mocks"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/auth"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/hash"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"testing"

@@ -1,28 +1,37 @@
 package exec
 
 import (
-	"backend-bootcamp-assignment-2024/internal/repo/repoerr"
-	"backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"context"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v5"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/repoerr"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 )
 
 func InsertWithReturningID(ctx context.Context, query sq.InsertBuilder, db transactor.QueryEngine) (uint, error) {
-	rawQuery, args, err := query.ToSql()
+	row, err := InsertWithRow(ctx, query, db)
 	if err != nil {
 		return 0, err
 	}
 
-	row := db.QueryRow(ctx, rawQuery, args...)
-
 	var id uint
 	err = row.Scan(&id)
 
-	if err != nil && isDuplicateKeyError(err) {
+	if err != nil && IsDuplicateKeyError(err) {
 		return 0, repoerr.ErrDuplicate
 	}
 
 	return id, err
+}
+
+func InsertWithRow(ctx context.Context, query sq.InsertBuilder, db transactor.QueryEngine) (pgx.Row, error) {
+	rawQuery, args, err := query.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := db.QueryRow(ctx, rawQuery, args...)
+	return row, nil
 }
 
 func Insert(ctx context.Context, query sq.InsertBuilder, db transactor.QueryEngine) error {
@@ -36,7 +45,7 @@ func Insert(ctx context.Context, query sq.InsertBuilder, db transactor.QueryEngi
 		return nil
 	}
 
-	if isDuplicateKeyError(err) {
+	if IsDuplicateKeyError(err) {
 		return repoerr.ErrDuplicate
 	}
 	return err

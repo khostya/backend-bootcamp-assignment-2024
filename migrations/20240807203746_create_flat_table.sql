@@ -2,13 +2,14 @@
 -- +goose StatementBegin
 create table if not exists bootcamp.flats
 (
-    id           int primary key      not null,
+    id           serial primary key   not null,
+    number       int                  not null,
     house_id     int                  not null references bootcamp.houses (id),
     price        int                  not null,
     rooms        int                  not null,
     status       bootcamp.flat_status not null,
     moderator_id uuid,
-    unique (id, house_id)
+    unique (number, house_id)
 );
 -- +goose StatementEnd
 

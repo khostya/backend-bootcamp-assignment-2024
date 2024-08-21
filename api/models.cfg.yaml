@@ -1,0 +1,7 @@
+package: model
+output: ./../internal/http/api/models/model.gen.go
+generate:
+  models: true
+
+output-options:
+  skip-prune: true

@@ -10,11 +10,11 @@
 package mock_usecase
 
 import (
-	domain "backend-bootcamp-assignment-2024/internal/domain"
-	dto "backend-bootcamp-assignment-2024/internal/dto"
 	context "context"
 	reflect "reflect"
 
+	domain "github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	dto "github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -57,30 +57,30 @@ func (mr *MockhouseServiceMockRecorder) Create(ctx, param any) *gomock.Call {
 }
 
 // GetByID mocks base method.
-func (m *MockhouseService) GetByID(ctx context.Context, id uint) (domain.House, error) {
+func (m *MockhouseService) GetByID(ctx context.Context, id uint, userType domain.UserType) (domain.House, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", ctx, id)
+	ret := m.ctrl.Call(m, "GetByID", ctx, id, userType)
 	ret0, _ := ret[0].(domain.House)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByID indicates an expected call of GetByID.
-func (mr *MockhouseServiceMockRecorder) GetByID(ctx, id any) *gomock.Call {
+func (mr *MockhouseServiceMockRecorder) GetByID(ctx, id, userType any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockhouseService)(nil).GetByID), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockhouseService)(nil).GetByID), ctx, id, userType)
 }
 
 // Subscribe mocks base method.
-func (m *MockhouseService) Subscribe(ctx context.Context, id int, email string) error {
+func (m *MockhouseService) Subscribe(ctx context.Context, subscription domain.Subscription) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Subscribe", ctx, id, email)
+	ret := m.ctrl.Call(m, "Subscribe", ctx, subscription)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Subscribe indicates an expected call of Subscribe.
-func (mr *MockhouseServiceMockRecorder) Subscribe(ctx, id, email any) *gomock.Call {
+func (mr *MockhouseServiceMockRecorder) Subscribe(ctx, subscription any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockhouseService)(nil).Subscribe), ctx, id, email)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockhouseService)(nil).Subscribe), ctx, subscription)
 }

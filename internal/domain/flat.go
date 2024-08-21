@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"backend-bootcamp-assignment-2024/internal/dto"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
 )
 
 const (
@@ -21,7 +21,8 @@ type (
 		Price       uint       `json:"price"`
 		Rooms       uint       `json:"rooms"`
 		Status      FlatStatus `json:"status"`
-		ModeratorID uuid.UUID  `json:"_"`
+		Number      uint       `json:"-"`
+		ModeratorID uuid.UUID  `json:"-"`
 	}
 )
 

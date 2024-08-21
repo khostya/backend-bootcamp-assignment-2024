@@ -1,14 +1,16 @@
 package repo
 
 import (
-	"backend-bootcamp-assignment-2024/internal/domain"
-	"backend-bootcamp-assignment-2024/internal/repo/exec"
-	"backend-bootcamp-assignment-2024/internal/repo/schema"
-	"backend-bootcamp-assignment-2024/internal/repo/transactor"
 	"context"
 	"database/sql"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/dto"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/exec"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/repoerr"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/schema"
+	"github.com/khostya/backend-bootcamp-assignment-2024/internal/repo/transactor"
 )
 
 const (
@@ -21,36 +23,34 @@ type (
 	}
 )
 
-func (f Flat) Create(ctx context.Context, flat domain.Flat) (uint, error) {
+func (f Flat) Create(ctx context.Context, flat domain.Flat) (dto.FlatCreateResult, error) {
 	db := f.queryEngineProvider.GetQueryEngine(ctx)
 
 	record := schema.NewFlat(flat)
 	query := sq.Insert(flatTable).
-		Columns(record.Columns()...).
-		Values(record.Values()...).
+		Columns(record.InsertColumns()...).
+		Values(record.InsertValues()...).
 		PlaceholderFormat(sq.Dollar).
-		Suffix(`RETURNING "id"`)
+		Suffix(`RETURNING "id", "number"`)
 
-	rawQuery, args, err := query.ToSql()
+	row, err := exec.InsertWithRow(ctx, query, db)
 	if err != nil {
-		return 0, err
+		return dto.FlatCreateResult{}, err
 	}
 
-	row, err := db.Query(ctx, rawQuery, args...)
-	if err != nil {
-		return 0, err
+	var id, number uint
+	err = row.Scan(&id, &number)
+	if err != nil && exec.IsDuplicateKeyError(err) {
+		return dto.FlatCreateResult{}, repoerr.ErrDuplicate
 	}
-	defer row.Close()
 
-	var id uint
-	err = row.Scan(&id)
-	return id, err
+	return dto.FlatCreateResult{ID: id, Number: number}, nil
 }
 
 func (f Flat) GetByID(ctx context.Context, id uint) (domain.Flat, error) {
 	db := f.queryEngineProvider.GetQueryEngine(ctx)
 
-	query := sq.Select(schema.Flat{}.Columns()...).
+	query := sq.Select(schema.Flat{}.SelectColumns()...).
 		From(flatTable).
 		Where("id = $1", id).
 		PlaceholderFormat(sq.Dollar)
@@ -68,7 +68,7 @@ func (f Flat) UpdateStatus(ctx context.Context, id uint, status domain.FlatStatu
 
 	query := sq.Update(flatTable).
 		Set("status", status).
-		Where("id = $1", id).
+		Where("id = $2", id).
 		PlaceholderFormat(sq.Dollar)
 
 	return exec.Update(ctx, query, db)
@@ -85,7 +85,7 @@ func (f Flat) SetModeratorID(ctx context.Context, id uint, moderatorID *uuid.UUI
 	sqlModeratorID := sql.Null[uuid.UUID]{V: nullableModeratorID, Valid: nullableModeratorID.String() != uuid.UUID{}.String()}
 	query := sq.Update(flatTable).
 		Set("moderator_id", sqlModeratorID).
-		Where("id = $1", id).
+		Where("id = $2", id).
 		PlaceholderFormat(sq.Dollar)
 
 	return exec.Update(ctx, query, db)

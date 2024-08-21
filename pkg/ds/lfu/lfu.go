@@ -1,7 +1,7 @@
 package lfu
 
 import (
-	"backend-bootcamp-assignment-2024/pkg/ds/linkedlist"
+	"github.com/khostya/backend-bootcamp-assignment-2024/pkg/ds/linkedlist"
 	"sync"
 	"time"
 )

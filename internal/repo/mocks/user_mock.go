@@ -10,11 +10,11 @@
 package mock_repo
 
 import (
-	domain "backend-bootcamp-assignment-2024/internal/domain"
 	context "context"
 	reflect "reflect"
 
 	uuid "github.com/google/uuid"
+	domain "github.com/khostya/backend-bootcamp-assignment-2024/internal/domain"
 	gomock "go.uber.org/mock/gomock"
 )
 
