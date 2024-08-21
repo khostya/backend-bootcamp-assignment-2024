@@ -1,23 +1,27 @@
 DEFAULT_PG_URL=postgres://postgres:password@localhost:5431/postgres?sslmode=disable
 
+.PHONY: .build-goose
+build-goose:
+	go install github.com/pressly/goose/v3/cmd/goose@latest
+
 .PHONY: .migration-up
-migration-up:
+migration-up: build-goose
 	$(eval PG_URL?=$(DEFAULT_PG_URL))
 	goose -dir ./migrations postgres "$(PG_URL)" up
 
 .PHONY: .migration-down
-migration-down:
+migration-down: build-goose
 	$(eval PG_URL?=$(DEFAULT_PG_URL))
 	goose -dir ./migrations postgres "$(PG_URL)" down
 
 .PHONY: .migration-status
-migration-status:
+migration-status: build-goose
 	$(eval PG_URL?=$(DEFAULT_PG_URL))
 	goose -dir ./migrations postgres "$(PG_URL)" status
 
 
 .PHONY: .migration-create-sql
-migration-create-sql:
+migration-create-sql: build-goose
 	goose -dir ./migrations create $(filter-out $@,$(MAKECMDGOALS)) sql
 
 .PHONY: .generate-ifacemaker
